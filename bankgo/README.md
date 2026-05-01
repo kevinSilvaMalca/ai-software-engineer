@@ -6,7 +6,7 @@
 [![CI](https://github.com/khack/ai-software-engineer/actions/workflows/ci.yml/badge.svg)](https://github.com/khack/ai-software-engineer/actions/workflows/ci.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)
 ![Expo SDK](https://img.shields.io/badge/Expo-SDK%2054-black?logo=expo)
-![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?logo=react)
+![React Native](https://img.shields.io/badge/React%20Native-0.76-61DAFB?logo=react)
 ![Tests](https://img.shields.io/badge/tests-25%20passing-green?logo=jest)
 
 ---
@@ -29,7 +29,7 @@ BankGo es una app móvil de banca personal que demuestra:
 
 | Categoría | Tecnología |
 |-----------|-----------|
-| Framework | React Native 0.81 + Expo SDK 54 |
+| Framework | React Native 0.76 + Expo SDK 54 |
 | Lenguaje | TypeScript strict |
 | Navegación | Expo Router v4 (file-based) |
 | Estado global | Zustand v5 |
@@ -71,7 +71,12 @@ npm install --legacy-peer-deps
 ### 3. Iniciar en desarrollo
 
 ```bash
+# Desarrollo local (simulador/emulador en la misma máquina)
 npx expo start
+
+# Dispositivo físico con Expo Go (requiere ngrok instalado)
+npm install -g @expo/ngrok@^4.1.0
+EXPO_OFFLINE=1 npx expo start --tunnel --clear
 ```
 
 Opciones disponibles:
@@ -80,7 +85,7 @@ Opciones disponibles:
 - `w` → abrir en navegador (web)
 - Escanear QR con Expo Go en dispositivo físico
 
-> El mock server (MSW) se inicializa automáticamente. No es necesario levantar ningún backend externo.
+> **Mock API**: En Expo Go (device físico) la app usa un cliente mock interno que sirve los datos del seed directamente, sin necesidad de ningún servidor externo. MSW solo se usa en tests.
 
 ### 4. Correr tests
 
@@ -125,7 +130,8 @@ npm run format
 ```
 bankgo/
 ├── app/                          # Expo Router — rutas file-based
-│   ├── _layout.tsx               # Root layout: AuthGuard + MSW bootstrap
+│   ├── _layout.tsx               # Root layout: AuthGuard
+│   ├── index.tsx                 # Ruta raíz → redirige a /(auth)/login
 │   ├── (auth)/                   # Grupo rutas públicas (sin auth)
 │   │   ├── _layout.tsx
 │   │   └── login.tsx             # Pantalla de login
@@ -147,10 +153,11 @@ bankgo/
 │   │   └── cardsStore.ts         # Tarjetas + optimistic freeze
 │   ├── services/                 # Infrastructure layer
 │   │   ├── api/
-│   │   │   ├── client.ts         # fetch wrapper con Bearer token
-│   │   │   ├── handlers.ts       # MSW handlers (10 endpoints)
+│   │   │   ├── client.ts         # API client: devClient en device, httpClient en tests
+│   │   │   ├── devClient.ts      # Mock client sin fetch (para Expo Go)
+│   │   │   ├── handlers.ts       # MSW handlers (10 endpoints, solo tests)
 │   │   │   ├── seed.ts           # Datos mock (usuario, cuentas, transacciones)
-│   │   │   └── setup.ts          # Bootstrap MSW server
+│   │   │   └── setup.ts          # Bootstrap MSW server (solo tests)
 │   │   ├── auth/
 │   │   │   ├── authService.ts    # Login / logout / restoreSession
 │   │   │   ├── pkce.ts           # PKCE RFC 7636 (verifier + challenge + state)
@@ -295,11 +302,12 @@ El backend es un mock (MSW) — acepta cualquier combinación válida de formato
 ## Variables de entorno
 
 ```bash
-# .env.example — copiar a .env para desarrollo local
-EXPO_PUBLIC_API_BASE_URL=   # vacío = MSW intercepta fetch() directamente
+# .env.local — copiar desde .env.example
+EXPO_PUBLIC_API_BASE_URL=   # vacío en desarrollo (devClient no usa fetch)
 ```
 
-En tests y desarrollo con Expo Go, la URL base está vacía. MSW intercepta todas las llamadas a `fetch()` independientemente del host.
+**En tests**: `apiClient` usa el cliente HTTP real + MSW intercepta `fetch()`.  
+**En Expo Go (device)**: `apiClient` usa `devClient` que sirve datos del seed directamente, sin ninguna llamada de red. No se necesita servidor externo ni URL base.
 
 ---
 
@@ -321,7 +329,20 @@ Verificar `moduleNameMapper` en `package.json`:
 ### Expo Go no muestra cambios
 
 ```bash
-npx expo start --clear
+EXPO_OFFLINE=1 npx expo start --tunnel --clear
+```
+
+### `TypeError: fetch failed` al iniciar con `--tunnel`
+
+El CLI de Expo intenta validar versiones contra `api.expo.dev`. Si no hay conexión, usar:
+```bash
+EXPO_OFFLINE=1 npx expo start --tunnel --clear
+```
+
+### ngrok no instalado
+
+```bash
+npm install -g @expo/ngrok@^4.1.0
 ```
 
 ### TypeScript errors en `__DEV__`

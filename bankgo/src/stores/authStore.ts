@@ -31,7 +31,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   user: null,
-  isLoading: false,
+  isLoading: true,  // true hasta que initialize() termine — evita flash de redirección
   error: null,
 
   async login(email: string, password: string): Promise<void> {
