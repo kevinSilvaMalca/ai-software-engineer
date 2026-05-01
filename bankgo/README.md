@@ -3,7 +3,7 @@
 > Caso técnico para **Inteligo Group** — aplicación móvil de banca personal.  
 > Desarrollado con **OpenCode** + **GentleIA** como caso de uso de ingeniería asistida por IA.
 
-[![CI](https://github.com/khack/ai-software-engineer/actions/workflows/ci.yml/badge.svg)](https://github.com/khack/ai-software-engineer/actions/workflows/ci.yml)
+[![CI](https://github.com/kevinSilvaMalca/ai-software-engineer/actions/workflows/ci.yml/badge.svg)](https://github.com/kevinSilvaMalca/ai-software-engineer/actions/workflows/ci.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)
 ![Expo SDK](https://img.shields.io/badge/Expo-SDK%2054-black?logo=expo)
 ![React Native](https://img.shields.io/badge/React%20Native-0.76-61DAFB?logo=react)
@@ -11,115 +11,184 @@
 
 ---
 
-## Descripción
+## ¿Qué es BankGo?
 
-BankGo es una app móvil de banca personal que demuestra:
+BankGo es una aplicación móvil de banca personal construida con React Native y Expo. Simula las funcionalidades principales de una app bancaria real:
 
-- **Autenticación PKCE** (RFC 7636) simulada con `expo-crypto`
-- **Arquitectura en capas** (Presentation → Domain → Infrastructure)
-- **Estado global** con Zustand v5 (5 stores independientes)
-- **Backend mock** con MSW v2 (10 endpoints REST tipados)
-- **Modo offline-first** con cache TTL en AsyncStorage
-- **Testing** con Jest + jest-expo (25 tests, 5 suites)
-- **CI/CD** con GitHub Actions (type-check → lint → tests → build)
+- **Login seguro** con autenticación PKCE (estándar RFC 7636 usado en apps móviles reales)
+- **Dashboard** con listado de cuentas y balances
+- **Transacciones** paginadas por cuenta
+- **Transferencias** con flujo de 3 pasos (formulario → revisión → confirmación)
+- **Tarjetas** con opción de congelar/descongelar
+- **Modo offline** — la app muestra datos cacheados cuando no hay red
 
----
-
-## Stack tecnológico
-
-| Categoría | Tecnología |
-|-----------|-----------|
-| Framework | React Native 0.76 + Expo SDK 54 |
-| Lenguaje | TypeScript strict |
-| Navegación | Expo Router v4 (file-based) |
-| Estado global | Zustand v5 |
-| Mock backend | MSW v2 |
-| Cache offline | AsyncStorage (TTL-based) |
-| Tokens seguros | expo-secure-store (keychain OS) |
-| Criptografía | expo-crypto (SHA-256, CSPRNG) |
-| Testing | Jest 29 + jest-expo + @testing-library/react-native |
-| CI/CD | GitHub Actions |
+No necesita ningún servidor externo. Todos los datos son mock: se generan localmente en el código.
 
 ---
 
-## Requisitos previos
+## Cómo funciona por dentro
 
-- **Node.js 20+** — verificar con `node --version`
-- **npm 10+** — verificar con `npm --version`
-- **Expo Go** (opcional) — app en iOS/Android para preview físico
-- **Emulador iOS/Android** o navegador (para `expo start --web`)
+### El problema que resuelve cada capa
 
----
-
-## Instalación y ejecución
-
-### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/khack/ai-software-engineer.git
-cd ai-software-engineer/bankgo
+```
+┌─────────────────────────────────────────────────┐
+│  PANTALLAS (app/)                               │
+│  Lo que el usuario ve y toca                    │
+│  login.tsx, dashboard.tsx, cards.tsx, etc.      │
+└───────────────────┬─────────────────────────────┘
+                    │ llaman a
+┌───────────────────▼─────────────────────────────┐
+│  STORES (src/stores/)                           │
+│  El estado global de la app — Zustand v5        │
+│  authStore, accountsStore, cardsStore, etc.     │
+└───────────────────┬─────────────────────────────┘
+                    │ usan
+┌───────────────────▼─────────────────────────────┐
+│  SERVICIOS (src/services/)                      │
+│  Comunicación con APIs, tokens, cache           │
+│  apiClient, authService, cacheService           │
+└─────────────────────────────────────────────────┘
 ```
 
-### 2. Instalar dependencias
+### El flujo de arranque paso a paso
+
+Cuando abrís la app en el celular, esto es lo que pasa:
+
+```
+1. index.ts
+   └─ importa expo-router/entry
+
+2. app/_layout.tsx monta
+   └─ isLoading = true (el store arranca en true, bloquea cualquier redirección prematura)
+   └─ llama initialize() → lee SecureStore
+       ├─ Si hay tokens válidos → isAuthenticated = true → muestra el Stack de pantallas
+       └─ Si no hay tokens    → isAuthenticated = false → <Redirect href="/(auth)/login" />
+
+3. app/(auth)/login.tsx
+   └─ usuario ingresa email + contraseña
+   └─ login() → genera PKCE (verifier + challenge) → POST /auth/token (mock)
+   └─ guarda tokens en SecureStore (Keychain iOS / Android Keystore)
+   └─ isAuthenticated = true → AuthGuard redirige a /(app)/dashboard
+
+4. app/(app)/dashboard.tsx
+   └─ fetchAccounts() → GET /accounts (mock)
+   └─ guarda en AsyncStorage con TTL 5 minutos
+   └─ muestra lista de cuentas
+```
+
+### Por qué los datos no necesitan servidor
+
+La app tiene dos modos de cliente API:
+
+| Entorno | Cliente usado | Cómo funciona |
+|---------|---------------|---------------|
+| **Expo Go / device** | `devClient.ts` | Retorna datos del seed directamente. Sin fetch, sin red. |
+| **Tests (Jest)** | `httpApiClient` + MSW | Fetch real interceptado por MSW con los mismos handlers. |
+
+Esto significa que podés abrir la app en tu celular sin configurar nada y ya tenés datos reales de ejemplo.
+
+---
+
+## Instalación
+
+### Requisitos
+
+- **Node.js 20+** — `node --version`
+- **npm 10+** — `npm --version`
+- **Expo Go 54** en tu celular (App Store / Play Store) — o emulador Android/iOS
+
+### Pasos
 
 ```bash
+# 1. Clonar
+git clone https://github.com/kevinSilvaMalca/ai-software-engineer.git
+cd ai-software-engineer/bankgo
+
+# 2. Instalar dependencias
 npm install --legacy-peer-deps
 ```
 
-> `--legacy-peer-deps` es necesario por conflictos de peer deps entre `react@19` y algunas librerías del ecosistema Expo que aún declaran `react@18` como peer dep.
+> **¿Por qué `--legacy-peer-deps`?** Algunas librerías del ecosistema Expo declaran `react@18` como peer dep pero el proyecto usa la versión correcta para RN 0.76. El flag ignora ese conflicto de declaración sin romper nada.
 
-### 3. Iniciar en desarrollo
+---
+
+## Cómo correr la app
+
+### Opción A — Emulador Android (recomendado, ves los logs)
 
 ```bash
-# Desarrollo local (simulador/emulador en la misma máquina)
-npx expo start
+# Instalar Android Studio primero: https://developer.android.com/studio
+# Crear un AVD (Pixel 7, API 34) desde Virtual Device Manager
+# Arrancar el emulador, luego:
 
-# Dispositivo físico con Expo Go (requiere ngrok instalado)
+npx expo start --android
+```
+
+### Opción B — Dispositivo físico con Expo Go
+
+```bash
+# Instalar ngrok (solo la primera vez)
 npm install -g @expo/ngrok@^4.1.0
+
+# Arrancar con tunnel
 EXPO_OFFLINE=1 npx expo start --tunnel --clear
 ```
 
-Opciones disponibles:
-- `i` → abrir en simulador iOS
-- `a` → abrir en emulador Android
-- `w` → abrir en navegador (web)
-- Escanear QR con Expo Go en dispositivo físico
+Escaneá el QR con la cámara (iOS) o con la app Expo Go (Android).
 
-> **Mock API**: En Expo Go (device físico) la app usa un cliente mock interno que sirve los datos del seed directamente, sin necesidad de ningún servidor externo. MSW solo se usa en tests.
+> **`EXPO_OFFLINE=1`** evita que el CLI de Expo intente validar versiones contra internet — en algunas redes falla y bloquea el arranque.
 
-### 4. Correr tests
+### Opción C — Navegador web
 
 ```bash
-# Tests con cobertura
+npx expo start --web
+```
+
+---
+
+## Credenciales de prueba
+
+| Campo | Valor |
+|-------|-------|
+| Email | `maria.garcia@example.com` |
+| Contraseña | cualquier texto de 4+ caracteres |
+
+El mock acepta cualquier combinación. No valida credenciales reales.
+
+---
+
+## Tests
+
+```bash
+# Correr todos los tests con cobertura
 npm test
 
-# Tests en modo watch (desarrollo)
+# Modo watch (se re-ejecutan al guardar)
 npm run test:watch
 ```
 
-Output esperado: **25 tests pasando en 5 suites**.
+**25 tests en 5 suites** — todos deben pasar.
 
-### 5. Type check
+Los tests cubren:
+- `pkce.test.ts` — generación de verifier, challenge y state (RFC 7636)
+- `cache.test.ts` — TTL, get/set/remove en AsyncStorage
+- `logger.test.ts` — sanitización de tokens y datos sensibles en logs
+- `accountsStore.test.ts` — fetch de cuentas, fallback offline, cache
+- `transferStore.test.ts` — validación, submit, confirm, reset del wizard
+
+---
+
+## Otros comandos
 
 ```bash
+# Verificar tipos TypeScript (cero errores esperados)
 npm run type-check
-```
 
-Ejecuta `tsc --noEmit` con configuración strict. Cero errores esperados.
-
-### 6. Lint
-
-```bash
-# Verificar
+# Lint
 npm run lint
-
-# Verificar y auto-corregir
 npm run lint:fix
-```
 
-### 7. Formatear código
-
-```bash
+# Formatear con Prettier
 npm run format
 ```
 
@@ -129,222 +198,175 @@ npm run format
 
 ```
 bankgo/
-├── app/                          # Expo Router — rutas file-based
-│   ├── _layout.tsx               # Root layout: AuthGuard
-│   ├── index.tsx                 # Ruta raíz → redirige a /(auth)/login
-│   ├── (auth)/                   # Grupo rutas públicas (sin auth)
+├── app/                          # Rutas de la app (Expo Router — file-based)
+│   ├── _layout.tsx               # Layout raíz: spinner de carga + guard de auth
+│   ├── index.tsx                 # Ruta "/" → redirige a login
+│   ├── (auth)/                   # Rutas públicas (sin sesión)
 │   │   ├── _layout.tsx
 │   │   └── login.tsx             # Pantalla de login
-│   └── (app)/                    # Grupo rutas protegidas (requieren auth)
-│       ├── _layout.tsx           # Tab bar navigation
-│       ├── dashboard.tsx         # Lista de cuentas
-│       ├── transfer.tsx          # Wizard de transferencia (3 pasos)
-│       ├── cards.tsx             # Tarjetas con toggle freeze
+│   └── (app)/                    # Rutas protegidas (requieren sesión)
+│       ├── _layout.tsx           # Navegación por tabs
+│       ├── dashboard.tsx         # Lista de cuentas con balances
+│       ├── transfer.tsx          # Transferencias (3 pasos)
+│       ├── cards.tsx             # Tarjetas con freeze/unfreeze
 │       └── account/
 │           └── [id].tsx          # Transacciones paginadas por cuenta
 │
 ├── src/
-│   ├── types/index.ts            # Tipos de dominio compartidos
-│   ├── stores/                   # Zustand stores (Domain layer)
-│   │   ├── authStore.ts          # Auth: login, logout, session restore
-│   │   ├── accountsStore.ts      # Cuentas + offline-first cache
-│   │   ├── transactionsStore.ts  # Transacciones paginadas + cache
-│   │   ├── transferStore.ts      # Wizard: form → review → confirmed
-│   │   └── cardsStore.ts         # Tarjetas + optimistic freeze
-│   ├── services/                 # Infrastructure layer
+│   ├── types/index.ts            # Tipos de dominio (User, Account, Card, etc.)
+│   ├── stores/                   # Estado global — Zustand v5
+│   │   ├── authStore.ts          # Sesión: login, logout, initialize
+│   │   ├── accountsStore.ts      # Cuentas con cache offline (TTL 5 min)
+│   │   ├── transactionsStore.ts  # Transacciones paginadas con cache (TTL 2 min)
+│   │   ├── transferStore.ts      # Wizard de transferencia
+│   │   └── cardsStore.ts         # Tarjetas con optimistic update en freeze
+│   ├── services/
 │   │   ├── api/
-│   │   │   ├── client.ts         # API client: devClient en device, httpClient en tests
-│   │   │   ├── devClient.ts      # Mock client sin fetch (para Expo Go)
-│   │   │   ├── handlers.ts       # MSW handlers (10 endpoints, solo tests)
-│   │   │   ├── seed.ts           # Datos mock (usuario, cuentas, transacciones)
-│   │   │   └── setup.ts          # Bootstrap MSW server (solo tests)
+│   │   │   ├── client.ts         # Exporta devClient (device) o httpClient (tests)
+│   │   │   ├── devClient.ts      # Mock sin fetch — sirve seed data directamente
+│   │   │   ├── handlers.ts       # MSW handlers — solo para tests
+│   │   │   ├── seed.ts           # Datos mock: cuentas, transacciones, tarjetas
+│   │   │   └── setup.ts          # Bootstrap MSW — solo para tests
 │   │   ├── auth/
-│   │   │   ├── authService.ts    # Login / logout / restoreSession
-│   │   │   ├── pkce.ts           # PKCE RFC 7636 (verifier + challenge + state)
-│   │   │   └── tokenStore.ts     # In-memory token cache
+│   │   │   ├── authService.ts    # login / logout / restoreSession
+│   │   │   ├── pkce.ts           # PKCE RFC 7636
+│   │   │   └── tokenStore.ts     # Tokens en memoria (limpiados en logout)
 │   │   └── cache/
-│   │       └── cacheService.ts   # TTL cache (AsyncStorage)
+│   │       └── cacheService.ts   # Cache con TTL sobre AsyncStorage
 │   ├── hooks/
-│   │   └── useNetworkStatus.ts   # Hook de conectividad de red
-│   ├── components/ui/            # Componentes UI reutilizables
-│   │   ├── AccountCard.tsx
-│   │   ├── TransactionItem.tsx
-│   │   ├── OfflineBanner.tsx     # Banner offline
-│   │   ├── EmptyState.tsx
-│   │   ├── ErrorState.tsx
-│   │   ├── LoadingState.tsx
-│   │   ├── ConfirmationDialog.tsx
+│   │   └── useNetworkStatus.ts   # Detecta si hay red disponible
+│   ├── components/ui/            # Componentes reutilizables
+│   │   ├── AccountCard.tsx       # Tarjeta de cuenta con balance
+│   │   ├── TransactionItem.tsx   # Ítem de transacción
+│   │   ├── OfflineBanner.tsx     # Banner "sin conexión"
+│   │   ├── EmptyState.tsx        # Pantalla vacía genérica
+│   │   ├── ErrorState.tsx        # Pantalla de error con retry
+│   │   ├── LoadingState.tsx      # Spinner de carga
+│   │   ├── ConfirmationDialog.tsx# Diálogo de confirmación
 │   │   └── InAppNotification.tsx # Toast de éxito/error
 │   └── utils/
-│       └── logger.ts             # Logger con sanitizer de tokens/PII
+│       └── logger.ts             # Logger que nunca imprime tokens ni PII
 │
 ├── __tests__/                    # Tests unitarios
 │   ├── services/
-│   │   ├── pkce.test.ts          # PKCE: verifier, challenge, state
-│   │   ├── cache.test.ts         # CacheService: TTL, get/set/remove
-│   │   └── logger.test.ts        # Logger: sanitización de datos sensibles
+│   │   ├── pkce.test.ts
+│   │   ├── cache.test.ts
+│   │   └── logger.test.ts
 │   └── stores/
-│       ├── accountsStore.test.ts # Fetch, offline fallback, cache
-│       └── transferStore.test.ts # Validación, submit, confirm, reset
+│       ├── accountsStore.test.ts
+│       └── transferStore.test.ts
 │
-├── docs/
-│   ├── architecture.md           # Diagramas + decisiones de arquitectura
-│   ├── technical-decisions.md    # 5 ADRs detallados
+├── __mocks__/
+│   ├── msw-node-stub.js          # Stub de msw/node para Metro (no corre en device)
+│   └── NativeModules.js          # Mock de módulos nativos para Jest
+│
+├── docs/                         # Documentación técnica
+│   ├── architecture.md           # Diagramas de arquitectura
+│   ├── technical-decisions.md    # ADRs (decisiones técnicas)
 │   ├── ai-usage.md               # Registro de uso de IA
-│   └── wireframes/
-│       └── flow.md               # Wireframes ASCII del flujo completo
+│   └── wireframes/flow.md        # Wireframes de todas las pantallas
 │
-├── .github/workflows/ci.yml      # CI/CD pipeline
-├── app.json                      # Configuración Expo
+├── .github/workflows/ci.yml      # CI: type-check → lint → tests → build
+├── app.json                      # Config de Expo (SDK, scheme, orientación)
+├── metro.config.js               # Stub de msw/node en el bundler
 ├── tsconfig.json                 # TypeScript strict
-├── .eslintrc.js                  # ESLint config
+├── jest.setup.js                 # Setup global de tests
 └── package.json
 ```
 
 ---
 
-## Flujo de autenticación
+## Autenticación PKCE — cómo funciona
 
-BankGo implementa un flujo **PKCE simulado** (RFC 7636) para demostrar buenas prácticas de seguridad en autenticación móvil:
+PKCE (Proof Key for Code Exchange, RFC 7636) es el estándar de seguridad para autenticación en apps móviles. Protege contra ataques de intercepción del código de autorización.
 
-1. **Generación de verifier**: `expo-crypto.getRandomBytes(32)` produce 32 bytes criptográficamente seguros, codificados en base64url (43 caracteres mínimo según RFC).
-
-2. **Challenge SHA-256**: `expo-crypto.digest(SHA256, encode(verifier))` calcula el challenge — el servidor recibiría el challenge pero nunca el verifier.
-
-3. **Login request**: `POST /auth/token` con `{ email, password, code_challenge, code_challenge_method: 'S256', state }`.
-
-4. **Persistencia segura**: Los tokens se guardan en `expo-secure-store` (Keychain en iOS, Android Keystore en Android) — nunca en AsyncStorage ni en logs.
-
-5. **Session restore**: Al iniciar la app, `authService.restoreSession()` lee los tokens de SecureStore, verifica `expiresAt > Date.now()`, y restaura la sesión sin re-login.
-
-6. **Logout**: Borra todos los ítems de SecureStore y limpia `tokenStore` en memoria.
+**Flujo implementado:**
 
 ```
-generateVerifier() → generateChallenge(verifier) → POST /auth/token
-                                                      ↓
-                                              SecureStore.setItem(tokens)
-                                              tokenStore.setTokens(access, refresh)
-                                                      ↓
-                                              AuthGuard → redirect /dashboard
+1. generateCodeVerifier()
+   └─ 32 bytes random de expo-crypto.getRandomBytes()
+   └─ codificados en base64url → string de 43 chars
+
+2. generateCodeChallenge(verifier)
+   └─ SHA-256 del verifier via expo-crypto.digest()
+   └─ codificado en base64url
+
+3. POST /auth/token { email, password, code_challenge, method: 'S256' }
+   └─ el servidor (mock) devuelve { access_token, refresh_token, expires_in }
+
+4. Tokens guardados en SecureStore
+   └─ iOS: Keychain Services
+   └─ Android: Android Keystore
+   └─ NUNCA en AsyncStorage ni en logs
+
+5. Al reabrir la app:
+   └─ restoreSession() lee tokens de SecureStore
+   └─ verifica que expiresAt > ahora
+   └─ si son válidos: sesión restaurada sin re-login
 ```
 
 ---
 
 ## Modo offline
 
-La app implementa **offline-first** en dos stores:
+Las cuentas y transacciones tienen cache con TTL en AsyncStorage:
 
-### AccountsStore
+| Dato | TTL | Clave |
+|------|-----|-------|
+| Cuentas | 5 minutos | `bankgo:accounts` |
+| Transacciones | 2 minutos | `bankgo:transactions:{accountId}:{page}` |
 
-- Fetch exitoso → guarda en `AsyncStorage` con key `bankgo:accounts` y TTL de **5 minutos**
-- Fetch fallido → lee cache; si hay datos válidos, muestra con `isOffline: true`
-- Sin cache → muestra `ErrorState` con botón "Reintentar"
-
-### TransactionsStore
-
-- Fetch exitoso → guarda en `AsyncStorage` con key `bankgo:transactions:{accountId}:{page}` y TTL de **2 minutos**
-- Fetch fallido → lee cache de la misma página; si hay datos, muestra con `isOffline: true`
-
-El componente `OfflineBanner` se renderiza cuando `isOffline: true` en cualquiera de estos stores, informando al usuario que los datos pueden no estar actualizados.
+**Comportamiento cuando no hay red:**
+1. El fetch falla
+2. Se intenta leer el cache
+3. Si hay cache válido → muestra datos con banner "Sin conexión"
+4. Si no hay cache → muestra pantalla de error con botón "Reintentar"
 
 ---
 
 ## CI/CD
 
-Pipeline en `.github/workflows/ci.yml` con dos jobs:
-
-### Job 1: Quality Checks (bloquea merge si falla)
+Pipeline en `.github/workflows/ci.yml` que se ejecuta en cada push a `main` o `develop`:
 
 ```
-checkout → setup Node 20 → npm ci → tsc --noEmit → eslint → jest --coverage
+Job 1 — Quality
+  npm ci → tsc --noEmit → eslint → jest --coverage
+
+Job 2 — Build (depende de Job 1)
+  npm ci → expo export --platform web
 ```
-
-- **Type check**: TypeScript strict, cero errores
-- **Lint**: ESLint con config de Expo
-- **Tests**: 25 tests en 5 suites con cobertura (artefacto `coverage-report`)
-
-### Job 2: Expo Build Check (depende del Job 1)
-
-```
-checkout → setup Node 20 → npm ci → expo export --platform web
-```
-
-Verifica que el bundle de producción compila sin errores.
-
-**Triggers**: Push y Pull Requests a `main` y `develop`.
-
----
-
-## Documentación adicional
-
-| Documento | Descripción |
-|-----------|-------------|
-| [Arquitectura](docs/architecture.md) | Diagramas Mermaid de capas, auth flow y data flow. Decisiones clave y OWASP. |
-| [Decisiones técnicas](docs/technical-decisions.md) | 5 ADRs: Expo, Zustand, MSW, AsyncStorage/SecureStore, expo-crypto |
-| [Wireframes](docs/wireframes/flow.md) | Wireframes ASCII de todas las pantallas y estados |
-| [Uso de IA](docs/ai-usage.md) | Registro de cómo se usó OpenCode + GentleIA en el desarrollo |
-
----
-
-## Credenciales de prueba
-
-El backend es un mock (MSW) — acepta cualquier combinación válida de formato:
-
-| Campo | Valor |
-|-------|-------|
-| Email | `maria.garcia@example.com` |
-| Contraseña | Cualquier valor de 4+ caracteres |
-
-> El mock no valida credenciales reales — autentica cualquier request a `POST /auth/token`. El comportamiento simulado incluye latencia realista (200-400ms) para que los loading states sean visibles.
-
----
-
-## Variables de entorno
-
-```bash
-# .env.local — copiar desde .env.example
-EXPO_PUBLIC_API_BASE_URL=   # vacío en desarrollo (devClient no usa fetch)
-```
-
-**En tests**: `apiClient` usa el cliente HTTP real + MSW intercepta `fetch()`.  
-**En Expo Go (device)**: `apiClient` usa `devClient` que sirve datos del seed directamente, sin ninguna llamada de red. No se necesita servidor externo ni URL base.
 
 ---
 
 ## Troubleshooting
 
-### `npm install` falla con peer dep errors
-
+### `npm install` falla con errores de peer deps
 ```bash
 npm install --legacy-peer-deps
 ```
 
-### Los tests fallan con "Cannot find module 'msw/node'"
-
-Verificar `moduleNameMapper` en `package.json`:
-```json
-"^msw/node$": "<rootDir>/node_modules/msw/lib/node/index.js"
+### La app abre pero queda en pantalla blanca
+```bash
+EXPO_OFFLINE=1 npx expo start --tunnel --clear
+```
+Si sigue fallando, usá el emulador Android para ver los logs:
+```bash
+npx expo start --android
 ```
 
-### Expo Go no muestra cambios
-
+### `TypeError: fetch failed` al iniciar
 ```bash
 EXPO_OFFLINE=1 npx expo start --tunnel --clear
 ```
 
-### `TypeError: fetch failed` al iniciar con `--tunnel`
-
-El CLI de Expo intenta validar versiones contra `api.expo.dev`. Si no hay conexión, usar:
-```bash
-EXPO_OFFLINE=1 npx expo start --tunnel --clear
-```
-
-### ngrok no instalado
-
+### ngrok no encontrado
 ```bash
 npm install -g @expo/ngrok@^4.1.0
 ```
 
-### TypeScript errors en `__DEV__`
-
-`__DEV__` es una variable global de React Native declarada en el tipo global. Si el editor no la reconoce, verificar `tsconfig.json` incluye `"types": ["react-native"]`.
+### Los tests fallan con "Cannot find module"
+Verificar que `package.json` tenga el `moduleNameMapper` correcto y correr:
+```bash
+npm install --legacy-peer-deps
+npm test
+```
