@@ -10,14 +10,8 @@
  */
 
 import type {
-  TokenResponse,
-  User,
-  Account,
-  Transaction,
-  Card,
   Transfer,
   TransferRequest,
-  PaginatedResponse,
 } from '@/types/index';
 import {
   seedUser,

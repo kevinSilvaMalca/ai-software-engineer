@@ -2,6 +2,7 @@
 
 import type { ApiError } from '@/types/index';
 import { tokenStore } from '../auth/tokenStore';
+import { devApiClient } from './devClient';
 
 // ---------------------------------------------------------------------------
 // Typed error
@@ -111,8 +112,6 @@ export const httpApiClient = {
 // Public apiClient — en __DEV__ (Expo Go) usa devClient sin fetch;
 // en tests usa el cliente HTTP real que MSW intercepta.
 // ---------------------------------------------------------------------------
-
-import { devApiClient } from './devClient';
 
 export const apiClient =
   typeof __DEV__ !== 'undefined' && __DEV__ && process.env['NODE_ENV'] !== 'test'
