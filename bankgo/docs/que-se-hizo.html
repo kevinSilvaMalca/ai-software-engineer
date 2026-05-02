@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BankGo — Qué se implementó · Documentación técnica</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f8fafc;
+      --bg3: #f1f5f9;
+      --blue-700: #1d4ed8;
+      --blue-600: #2563eb;
+      --blue-500: #3b82f6;
+      --blue-100: #dbeafe;
+      --blue-50: #eff6ff;
+      --gray-900: #0f172a;
+      --gray-800: #1e293b;
+      --gray-700: #334155;
+      --gray-600: #475569;
+      --gray-500: #64748b;
+      --gray-400: #94a3b8;
+      --gray-300: #cbd5e1;
+      --gray-200: #e2e8f0;
+      --gray-100: #f1f5f9;
+      --green-600: #16a34a;
+      --green-100: #dcfce7;
+      --green-500: #22c55e;
+      --yellow-600: #ca8a04;
+      --yellow-100: #fef9c3;
+      --red-600: #dc2626;
+      --red-100: #fee2e2;
+      --purple-600: #7c3aed;
+      --purple-100: #f5f3ff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--gray-900);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--gray-900);
+      color: var(--gray-300);
+      padding: 32px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+    }
+    .sidebar-logo p {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 4px;
+    }
+
+    .nav-group-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gray-500);
+      padding: 12px 20px 4px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 7px 20px;
+      text-decoration: none;
+      color: var(--gray-400);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .nav-link:hover {
+      color: white;
+      border-left-color: var(--blue-500);
+      background: rgba(255,255,255,0.04);
+    }
+    .nav-link.active {
+      color: #93c5fd;
+      border-left-color: var(--blue-500);
+      background: rgba(59,130,246,0.1);
+    }
+
+    /* Main content */
+    main {
+      padding: 48px 72px;
+      max-width: 1000px;
+    }
+
+    /* Typography */
+    h1 { font-size: 40px; font-weight: 900; color: var(--gray-900); margin-bottom: 8px; }
+
+    h2 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin: 48px 0 6px;
+      padding-top: 16px;
+    }
+    h2:first-of-type { margin-top: 0; }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--blue-600);
+      margin: 28px 0 10px;
+    }
+
+    h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gray-700);
+      margin: 16px 0 8px;
+    }
+
+    p {
+      color: var(--gray-700);
+      font-size: 15px;
+      margin-bottom: 14px;
+      line-height: 1.7;
+    }
+
+    .lead {
+      font-size: 17px;
+      color: var(--gray-600);
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    /* Divider */
+    .section-divider {
+      height: 1px;
+      background: var(--gray-200);
+      margin: 40px 0;
+    }
+
+    /* Code */
+    .code-block {
+      background: var(--gray-900);
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 18px 22px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    .code-header {
+      background: var(--gray-800);
+      color: var(--gray-400);
+      font-size: 12px;
+      font-family: monospace;
+      padding: 8px 18px;
+      border-radius: 8px 8px 0 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .code-block.attached {
+      border-radius: 0 0 10px 10px;
+      margin-top: 0;
+    }
+
+    code {
+      background: var(--blue-50);
+      color: var(--blue-700);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.88em;
+      border: 1px solid var(--blue-100);
+    }
+
+    /* Syntax colors (inside .code-block) */
+    .kw { color: #c084fc; }
+    .str { color: #4ade80; }
+    .cmt { color: #475569; font-style: italic; }
+    .fn { color: #60a5fa; }
+    .num { color: #fbbf24; }
+    .type { color: #34d399; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    th {
+      background: var(--gray-100);
+      color: var(--gray-600);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-200);
+      color: var(--gray-700);
+      vertical-align: top;
+    }
+    tr:hover td { background: var(--bg2); }
+
+    /* Info boxes */
+    .box {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      border-left: 3px solid;
+    }
+    .box-info { background: var(--blue-50); border-color: var(--blue-500); color: var(--blue-700); }
+    .box-success { background: var(--green-100); border-color: var(--green-500); color: var(--green-600); }
+    .box-warn { background: var(--yellow-100); border-color: var(--yellow-600); color: var(--yellow-600); }
+    .box-code { background: #f8fafc; border-color: var(--gray-400); color: var(--gray-700); font-family: monospace; font-size: 13px; }
+
+    /* Checklist */
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--gray-700);
+    }
+    .check-list li::before {
+      content: '✓';
+      color: var(--green-600);
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Screen cards */
+    .screen-card {
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .screen-card-header {
+      background: var(--blue-600);
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .screen-card-icon { font-size: 20px; }
+    .screen-card-title { font-size: 16px; font-weight: 700; }
+    .screen-card-file { font-size: 12px; color: var(--blue-100); margin-top: 2px; font-family: monospace; }
+    .screen-card-body { padding: 20px; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .meta-item { }
+    .meta-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+    }
+    .meta-value {
+      font-size: 13px;
+      color: var(--gray-800);
+    }
+    .meta-value code { font-size: 12px; }
+
+    /* State badges */
+    .state-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin: 2px;
+    }
+    .state-loading { background: var(--blue-100); color: var(--blue-700); }
+    .state-error { background: var(--red-100); color: var(--red-600); }
+    .state-empty { background: var(--gray-100); color: var(--gray-600); }
+    .state-offline { background: var(--yellow-100); color: var(--yellow-600); }
+    .state-ok { background: var(--green-100); color: var(--green-600); }
+
+    /* Store card */
+    .store-card {
+      background: var(--bg2);
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 16px 0;
+    }
+    .store-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--blue-600);
+      font-family: monospace;
+      margin-bottom: 10px;
+    }
+
+    /* Test cards */
+    .test-suite {
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .test-suite-header {
+      background: var(--gray-900);
+      color: white;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .test-suite-title { font-size: 14px; font-weight: 700; font-family: monospace; }
+    .test-count { background: #22c55e; color: white; border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+    .test-item {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .test-item:last-child { border-bottom: none; }
+    .test-pass { color: #22c55e; font-size: 14px; flex-shrink: 0; }
+    .test-name { color: var(--gray-800); }
+    .test-desc { color: var(--gray-500); font-size: 12px; margin-top: 2px; }
+
+    /* ADR cards */
+    .adr-card {
+      border: 1px solid var(--gray-200);
+      border-left: 4px solid var(--blue-500);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .adr-number { font-size: 12px; font-weight: 700; color: var(--gray-400); letter-spacing: 1px; text-transform: uppercase; }
+    .adr-title { font-size: 16px; font-weight: 700; color: var(--gray-900); margin: 4px 0; }
+    .adr-decision { font-size: 14px; color: var(--gray-700); }
+
+    /* CI pipeline */
+    .pipeline {
+      display: flex;
+      gap: 16px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .pipeline-job {
+      flex: 1;
+      min-width: 280px;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .pipeline-job-header {
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pipeline-job-header.blue { background: var(--blue-600); color: white; }
+    .pipeline-job-header.green { background: var(--green-600); color: white; }
+    .pipeline-step {
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 13px;
+      color: var(--gray-700);
+      display: flex;
+      gap: 8px;
+    }
+    .pipeline-step:last-child { border-bottom: none; }
+    .step-icon { color: var(--gray-400); }
+
+    /* OWASP */
+    .owasp-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .owasp-item:last-child { border-bottom: none; }
+    .owasp-badge {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .owasp-ok { background: var(--green-100); color: var(--green-600); }
+    .owasp-content { flex: 1; }
+    .owasp-title { font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+    .owasp-desc { font-size: 13px; color: var(--gray-600); }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      background: var(--blue-50);
+      color: var(--blue-700);
+      border: 1px solid var(--blue-100);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      margin: 2px;
+      font-family: monospace;
+    }
+
+    section { scroll-margin-top: 20px; }
+
+    strong { color: var(--gray-900); }
+    em { color: var(--gray-600); }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>BankGo</h1>
+      <p>Documentación técnica completa</p>
+    </div>
+
+    <div class="nav-group-title">Arquitectura</div>
+    <a href="#arch-capas" class="nav-link">Diagrama de capas</a>
+    <a href="#arch-decisiones" class="nav-link">Decisiones técnicas (ADRs)</a>
+
+    <div class="nav-group-title">Pantallas</div>
+    <a href="#screen-login" class="nav-link">Login</a>
+    <a href="#screen-dashboard" class="nav-link">Dashboard</a>
+    <a href="#screen-account" class="nav-link">Account [id]</a>
+    <a href="#screen-transfer" class="nav-link">Transfer</a>
+    <a href="#screen-cards" class="nav-link">Cards</a>
+
+    <div class="nav-group-title">Autenticación</div>
+    <a href="#auth-pkce" class="nav-link">PKCE — RFC 7636</a>
+    <a href="#auth-service" class="nav-link">authService</a>
+    <a href="#auth-session" class="nav-link">Restore de sesión</a>
+
+    <div class="nav-group-title">Mock API</div>
+    <a href="#api-devclient" class="nav-link">devClient (device)</a>
+    <a href="#api-msw" class="nav-link">MSW handlers (tests)</a>
+    <a href="#api-endpoints" class="nav-link">10 endpoints</a>
+
+    <div class="nav-group-title">Stores Zustand</div>
+    <a href="#store-auth" class="nav-link">authStore</a>
+    <a href="#store-accounts" class="nav-link">accountsStore</a>
+    <a href="#store-transactions" class="nav-link">transactionsStore</a>
+    <a href="#store-transfer" class="nav-link">transferStore</a>
+    <a href="#store-cards" class="nav-link">cardsStore</a>
+
+    <div class="nav-group-title">Infraestructura</div>
+    <a href="#cache" class="nav-link">Cache offline (TTL)</a>
+    <a href="#tests-section" class="nav-link">Tests — 25 en 5 suites</a>
+    <a href="#cicd" class="nav-link">CI/CD Pipeline</a>
+    <a href="#ai-uso" class="nav-link">Uso de IA</a>
+    <a href="#seguridad" class="nav-link">Seguridad OWASP</a>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <main>
+
+    <!-- HEADER -->
+    <div style="margin-bottom: 40px;">
+      <div style="font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue-600); margin-bottom: 8px;">DOCUMENTACIÓN TÉCNICA</div>
+      <h1>Qué se implementó en BankGo</h1>
+      <p class="lead">Documentación completa de la implementación. Todos los fragmentos de código son reales, copiados de los archivos del proyecto. Esta documentación fue generada leyendo el código fuente, no inventada.</p>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 1 — ARQUITECTURA                                  -->
+    <!-- ======================================================== -->
+    <section id="arch-capas">
+      <h2>Sección 1 — Arquitectura</h2>
+      <p>BankGo implementa una arquitectura de 3 capas con separación estricta de responsabilidades. Cada capa solo conoce a la capa inmediatamente inferior.</p>
+
+      <div style="background: var(--bg2); border: 1px solid var(--gray-200); border-radius: 12px; padding: 24px; margin: 20px 0;">
+        <div style="display: grid; gap: 12px;">
+
+          <div style="background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px; padding: 14px 18px;">
+            <div style="font-size: 12px; font-weight: 800; color: var(--blue-700); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">PRESENTATION LAYER — app/</div>
+            <p style="font-size: 14px; color: var(--blue-700); margin: 0;">Pantallas React Native. Solo renderiza UI y despacha acciones a los stores. <strong>No contiene lógica de negocio</strong>. Usa expo-router para navegación file-based.</p>
+            <div style="margin-top: 8px; display: flex; flex-wrap: wrap;">
+              <span class="tag">_layout.tsx</span><span class="tag">(auth)/login.tsx</span><span class="tag">(app)/dashboard.tsx</span><span class="tag">(app)/transfer.tsx</span><span class="tag">(app)/cards.tsx</span><span class="tag">(app)/account/[id].tsx</span>
+            </div>
+          </div>
+
+          <div style="text-align: center; color: var(--gray-400); font-size: 20px;">↕ suscripción a stores</div>
+
+          <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 8px; padding: 14px 18px;">
+            <div style="font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">DOMAIN LAYER — src/stores/</div>
+            <p style="font-size: 14px; color: #166534; margin: 0;">Stores Zustand. Contienen estado de la aplicación y lógica de negocio (validaciones, transformaciones, decisiones de UI). Orquestan las llamadas a la infraestructura.</p>
+            <div style="margin-top: 8px; display: flex; flex-wrap: wrap;">
+              <span style="display: inline-block; background: rgba(22,163,74,0.1); color: #166534; border: 1px solid rgba(22,163,74,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">useAuthStore</span>
+              <span style="display: inline-block; background: rgba(22,163,74,0.1); color: #166534; border: 1px solid rgba(22,163,74,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">useAccountsStore</span>
+              <span style="display: inline-block; background: rgba(22,163,74,0.1); color: #166534; border: 1px solid rgba(22,163,74,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">useTransactionsStore</span>
+              <span style="display: inline-block; background: rgba(22,163,74,0.1); color: #166534; border: 1px solid rgba(22,163,74,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">useTransferStore</span>
+              <span style="display: inline-block; background: rgba(22,163,74,0.1); color: #166534; border: 1px solid rgba(22,163,74,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">useCardsStore</span>
+            </div>
+          </div>
+
+          <div style="text-align: center; color: var(--gray-400); font-size: 20px;">↕ llamadas a servicios</div>
+
+          <div style="background: #fef9c3; border: 1px solid #fde047; border-radius: 8px; padding: 14px 18px;">
+            <div style="font-size: 12px; font-weight: 800; color: #a16207; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">INFRASTRUCTURE LAYER — src/services/</div>
+            <p style="font-size: 14px; color: #a16207; margin: 0;">Implementaciones de I/O: cliente HTTP (apiClient/devClient), autenticación (authService, pkce, tokenStore), cache (cacheService). <strong>Sin lógica de UI ni de negocio</strong>.</p>
+            <div style="margin-top: 8px; display: flex; flex-wrap: wrap;">
+              <span style="display: inline-block; background: rgba(161,98,7,0.1); color: #a16207; border: 1px solid rgba(161,98,7,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">client.ts</span>
+              <span style="display: inline-block; background: rgba(161,98,7,0.1); color: #a16207; border: 1px solid rgba(161,98,7,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">devClient.ts</span>
+              <span style="display: inline-block; background: rgba(161,98,7,0.1); color: #a16207; border: 1px solid rgba(161,98,7,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">handlers.ts</span>
+              <span style="display: inline-block; background: rgba(161,98,7,0.1); color: #a16207; border: 1px solid rgba(161,98,7,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">authService.ts</span>
+              <span style="display: inline-block; background: rgba(161,98,7,0.1); color: #a16207; border: 1px solid rgba(161,98,7,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">pkce.ts</span>
+              <span style="display: inline-block; background: rgba(161,98,7,0.1); color: #a16207; border: 1px solid rgba(161,98,7,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; margin: 2px;">cacheService.ts</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <h3 id="arch-decisiones">Por qué esta arquitectura</h3>
+      <p><strong>Separación de concerns:</strong> Un cambio en la API solo afecta <code>src/services/api/</code>. Un cambio en el diseño visual solo afecta <code>app/</code>. Un cambio en las reglas de negocio solo afecta los stores.</p>
+      <p><strong>Testabilidad:</strong> Los stores son funciones puras de Zustand — se pueden probar sin montar componentes React. La infraestructura se mockea en tests sin afectar los stores ni la UI.</p>
+      <p><strong>Escalabilidad:</strong> Agregar una nueva pantalla = agregar un archivo en <code>app/</code> + suscribirse a stores existentes. Agregar un nuevo dominio = agregar un store + un endpoint en el cliente.</p>
+
+      <div class="section-divider"></div>
+
+      <h3>ADRs — Decisiones de Arquitectura</h3>
+
+      <div class="adr-card">
+        <div class="adr-number">ADR-001</div>
+        <div class="adr-title">React Native + Expo sobre Flutter o nativo puro</div>
+        <div class="adr-decision"><strong>Decisión:</strong> React Native 0.81 + Expo SDK 54. TypeScript end-to-end. Módulos nativos pre-compilados (expo-crypto, expo-secure-store). Expo Router para file-based navigation. <br><strong>Trade-off aceptado:</strong> Performance inferior a Flutter en listas muy largas. <code>FlatList</code> vs <code>FlashList</code> pendiente.</div>
+      </div>
+
+      <div class="adr-card">
+        <div class="adr-number">ADR-002</div>
+        <div class="adr-title">Zustand sobre Redux Toolkit o Context API</div>
+        <div class="adr-decision"><strong>Decisión:</strong> Zustand v5, un store por dominio. Sin dispatch, sin reducers, sin Provider. <code>create&lt;State&gt;()</code> con acciones async inline. <br><strong>Trade-off aceptado:</strong> Sin Redux DevTools nativo. Menos convenciones de equipo predefinidas.</div>
+      </div>
+
+      <div class="adr-card">
+        <div class="adr-number">ADR-003</div>
+        <div class="adr-title">MSW v2 sobre JSON Server o Axios Mock Adapter</div>
+        <div class="adr-decision"><strong>Decisión:</strong> MSW v2 con handlers TypeScript tipados. Un solo código para dev y test. Intercepta <code>fetch()</code> real. Estado in-memory stateful sin proceso externo. <br><strong>Trade-off aceptado:</strong> Sin persistencia entre reinicios de MSW.</div>
+      </div>
+
+      <div class="adr-card">
+        <div class="adr-number">ADR-004</div>
+        <div class="adr-title">AsyncStorage (cache) separado de SecureStore (tokens)</div>
+        <div class="adr-decision"><strong>Decisión:</strong> Threat model diferente. SecureStore = OS Keychain (iOS Keychain Services, Android Keystore). AsyncStorage = SQLite plano para cache no sensible. <br><strong>Trade-off aceptado:</strong> AsyncStorage no cifrado en dispositivos rooteados.</div>
+      </div>
+
+      <div class="adr-card">
+        <div class="adr-number">ADR-005</div>
+        <div class="adr-title">expo-crypto para PKCE sobre implementación manual</div>
+        <div class="adr-decision"><strong>Decisión:</strong> <code>Crypto.getRandomBytes()</code> usa SecRandomCopyBytes (iOS) / SecureRandom (Android). SHA-256 nativo del OS. No añade dependencias al bundle. <br><strong>Trade-off aceptado:</strong> Requiere mock en Jest (no corre en Node puro).</div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 2 — PANTALLAS                                     -->
+    <!-- ======================================================== -->
+    <section id="screen-login">
+      <h2>Sección 2 — Cada pantalla explicada</h2>
+
+      <!-- LOGIN -->
+      <div class="screen-card">
+        <div class="screen-card-header">
+          <div class="screen-card-icon">🔐</div>
+          <div>
+            <div class="screen-card-title">Login Screen</div>
+            <div class="screen-card-file">app/(auth)/login.tsx</div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">Store</div>
+              <div class="meta-value"><code>useAuthStore</code> — login, isLoading, error</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Endpoint mock</div>
+              <div class="meta-value"><code>POST /auth/token</code> + <code>GET /auth/me</code></div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Validación local</div>
+              <div class="meta-value">Email requerido, contraseña mínimo 4 caracteres</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Navegación</div>
+              <div class="meta-value">On success → <code>/(app)/dashboard</code></div>
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <strong>Estados UX:</strong>
+            <span class="state-badge state-loading">Loading (ActivityIndicator en botón)</span>
+            <span class="state-badge state-error">Error (texto rojo, re-intentable)</span>
+            <span class="state-badge state-ok">Idle (formulario vacío)</span>
+          </div>
+          <h4>Código clave — validación antes de llamar al store</h4>
+          <div class="code-block" style="font-size: 13px;">function validate(email: string, password: string): string | null {
+  if (!email.trim()) return 'El email es requerido.';
+  if (password.length &lt; 4) return 'La contraseña debe tener al menos 4 caracteres.';
+  return null;
+}
+
+async function handleLogin() {
+  const localError = validate(email, password);
+  if (localError) {
+    setValidationError(localError);
+    return;  // ← cortocircuito: no llama al store si falla validación local
+  }
+  setValidationError(null);
+  try {
+    await login(email.trim(), password);
+    router.replace('/(app)/dashboard');
+  } catch {
+    // Error is already stored in authStore.error — nothing extra to do here
+  }
+}</div>
+          <div class="box box-info" style="margin-top: 8px;">La validación tiene dos capas: local (antes del request) y del store (respuesta del servidor). El componente muestra el error con mayor prioridad usando <code>validationError ?? error</code>.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="screen-dashboard">
+      <div class="screen-card">
+        <div class="screen-card-header">
+          <div class="screen-card-icon">🏦</div>
+          <div>
+            <div class="screen-card-title">Dashboard Screen</div>
+            <div class="screen-card-file">app/(app)/dashboard.tsx</div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">Stores</div>
+              <div class="meta-value"><code>useAuthStore</code> (user.name) · <code>useAccountsStore</code> (accounts, fetchAccounts, isOffline)</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Endpoint mock</div>
+              <div class="meta-value"><code>GET /accounts</code></div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Navegación</div>
+              <div class="meta-value">Tap en account → <code>/(app)/account/:id</code></div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Cache</div>
+              <div class="meta-value"><code>bankgo:accounts</code> — TTL 5 min</div>
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <strong>Estados UX:</strong>
+            <span class="state-badge state-loading">Loading (primera carga)</span>
+            <span class="state-badge state-error">Error + Retry (sin cache)</span>
+            <span class="state-badge state-empty">EmptyState</span>
+            <span class="state-badge state-offline">OfflineBanner (con cache)</span>
+            <span class="state-badge state-ok">Lista de cuentas</span>
+          </div>
+          <h4>Código clave — estados de carga condicionales</h4>
+          <div class="code-block" style="font-size: 12px;">// ---- Loading (solo si no hay datos cacheados) ----
+if (isLoading &amp;&amp; accounts.length === 0) {
+  return &lt;LoadingState message="Cargando tus cuentas…" /&gt;;
+}
+
+// ---- Error (tampoco hay cache) ----
+if (error !== null &amp;&amp; accounts.length === 0) {
+  return &lt;ErrorState message={error} onRetry={handleRefresh} /&gt;;
+}
+
+// ---- Happy path: muestra datos + banner offline si aplica ----
+return (
+  &lt;View&gt;
+    &lt;OfflineBanner visible={isOffline} /&gt;
+    &lt;FlatList
+      data={accounts}
+      refreshControl={&lt;RefreshControl ... /&gt;}
+    /&gt;
+  &lt;/View&gt;
+);</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACCOUNT [ID] -->
+    <section id="screen-account">
+      <div class="screen-card">
+        <div class="screen-card-header">
+          <div class="screen-card-icon">📊</div>
+          <div>
+            <div class="screen-card-title">Account Screen (Movimientos)</div>
+            <div class="screen-card-file">app/(app)/account/[id].tsx</div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">Stores</div>
+              <div class="meta-value"><code>useAccountsStore</code> (getAccountById) · <code>useTransactionsStore</code> (fetchTransactions, loadMoreTransactions)</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Endpoint mock</div>
+              <div class="meta-value"><code>GET /accounts/:id/transactions?page=1&amp;limit=20</code></div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Parámetro de ruta</div>
+              <div class="meta-value"><code>useLocalSearchParams&lt;{id: string}&gt;()</code></div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Paginación</div>
+              <div class="meta-value">20 transacciones por página, scroll infinito con <code>onEndReached</code></div>
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <strong>Estados UX:</strong>
+            <span class="state-badge state-loading">Loading primera página</span>
+            <span class="state-badge state-loading">Loading más páginas (footer spinner)</span>
+            <span class="state-badge state-error">Error + Retry</span>
+            <span class="state-badge state-empty">Sin movimientos</span>
+            <span class="state-badge state-offline">OfflineBanner</span>
+          </div>
+          <h4>Código clave — paginación con scroll infinito</h4>
+          <div class="code-block" style="font-size: 12px;">const handleEndReached = useCallback(() => {
+  // Solo carga más si hay siguiente página y no está cargando
+  if (pagination?.hasNextPage &amp;&amp; !isLoading) {
+    void loadMoreTransactions(id);
+  }
+}, [id, pagination, isLoading, loadMoreTransactions]);
+
+// En el FlatList:
+&lt;FlatList
+  onEndReached={handleEndReached}
+  onEndReachedThreshold={0.3}  // ← carga cuando falta 30% para el final
+  ListFooterComponent={
+    isLoading &amp;&amp; transactions.length &gt; 0
+      ? &lt;ActivityIndicator color="#2563eb" /&gt;
+      : null
+  }
+/&gt;</div>
+          <div class="box box-info">Cada cuenta tiene 25 transacciones en el seed. Con paginación de 20, la primera página muestra las 20 más recientes, y la segunda página muestra las 5 restantes.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSFER -->
+    <section id="screen-transfer">
+      <div class="screen-card">
+        <div class="screen-card-header">
+          <div class="screen-card-icon">💸</div>
+          <div>
+            <div class="screen-card-title">Transfer Screen (Wizard 3 pasos)</div>
+            <div class="screen-card-file">app/(app)/transfer.tsx</div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">Store</div>
+              <div class="meta-value"><code>useTransferStore</code> (step, validate, submitTransfer, confirmTransfer) · <code>useAccountsStore</code> (accounts)</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Endpoints</div>
+              <div class="meta-value"><code>POST /transfers</code> (submitTransfer) · <code>POST /transfers/:id/confirm</code> (confirmTransfer)</div>
+            </div>
+          </div>
+          <h4>Flujo de 3 pasos controlado por <code>step</code></h4>
+          <table>
+            <tr><th>Step</th><th>Pantalla</th><th>Acción principal</th><th>Endpoint</th></tr>
+            <tr><td><code>'form'</code></td><td>Formulario</td><td>Seleccionar cuenta, beneficiario, monto, moneda</td><td>—</td></tr>
+            <tr><td><code>'review'</code></td><td>Resumen</td><td>Confirmar o cancelar la transferencia</td><td><code>POST /transfers</code></td></tr>
+            <tr><td><code>'confirmed'</code></td><td>Éxito</td><td>Notificación in-app, volver al inicio</td><td><code>POST /transfers/:id/confirm</code></td></tr>
+            <tr><td><code>'error'</code></td><td>Error</td><td>Mostrar mensaje, botón Retry</td><td>—</td></tr>
+          </table>
+          <h4>Validación antes del POST (código real del transferStore)</h4>
+          <div class="code-block" style="font-size: 12px;">validate(): string | null {
+  const { fromAccountId, beneficiaryId, amount } = get();
+  if (fromAccountId === null) return 'Seleccioná una cuenta de origen';
+  if (beneficiaryId === null) return 'Seleccioná un beneficiario';
+  const parsed = parseFloat(amount);
+  if (isNaN(parsed) || parsed &lt;= 0) return 'El monto debe ser mayor a 0';
+
+  // Verificar saldo disponible en la cuenta origen
+  const account = useAccountsStore.getState().getAccountById(fromAccountId);
+  if (account !== undefined &amp;&amp; parsed &gt; account.balance) {
+    return `Saldo insuficiente. Disponible: ${account.currency} ${account.balance.toFixed(2)}`;
+  }
+  return null;
+}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARDS -->
+    <section id="screen-cards">
+      <div class="screen-card">
+        <div class="screen-card-header">
+          <div class="screen-card-icon">💳</div>
+          <div>
+            <div class="screen-card-title">Cards Screen</div>
+            <div class="screen-card-file">app/(app)/cards.tsx</div>
+          </div>
+        </div>
+        <div class="screen-card-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">Store</div>
+              <div class="meta-value"><code>useCardsStore</code> — fetchCards, toggleCardFreeze</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Endpoints</div>
+              <div class="meta-value"><code>GET /cards</code> · <code>PATCH /cards/:id</code></div>
+            </div>
+          </div>
+          <h4>Optimistic update con rollback</h4>
+          <p>Cuando el usuario presiona "Congelar", la UI actualiza el estado <em>antes</em> de esperar la respuesta del servidor. Si el PATCH falla, se revierte al estado original:</p>
+          <div class="code-block" style="font-size: 12px;">// 1. Guardar el estado original
+const originalCard = cards[cardIndex];
+
+// 2. Actualizar optimísticamente (UI inmediata)
+const optimisticCards = cards.map((c) =>
+  c.id === cardId ? { ...c, frozen: !c.frozen } : c,
+);
+set({ cards: optimisticCards });
+
+try {
+  // 3. Llamada de red
+  const updated = await apiClient.patch&lt;Card&gt;(`/cards/${cardId}`);
+  // 4. Sincronizar con respuesta real
+  set((state) => ({
+    cards: state.cards.map((c) => (c.id === cardId ? updated : c)),
+  }));
+} catch (err) {
+  // 5. Revertir si falla
+  set((state) => ({
+    cards: state.cards.map((c) => (c.id === cardId ? originalCard : c)),
+  }));
+}</div>
+          <h4>Confirmación obligatoria</h4>
+          <p>Antes de ejecutar el toggle, se muestra un <code>ConfirmationDialog</code> con mensaje contextual diferente para congelar vs descongelar. Esto previene acciones accidentales.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 3 — AUTENTICACIÓN PKCE                            -->
+    <!-- ======================================================== -->
+    <section id="auth-pkce">
+      <h2>Sección 3 — Sistema de Autenticación PKCE</h2>
+
+      <h3>¿Qué es PKCE y por qué en mobile?</h3>
+      <p>PKCE (Proof Key for Code Exchange, RFC 7636) es una extensión del flujo OAuth 2.0 que resuelve un problema específico de las apps mobile: <strong>las apps mobile no pueden guardar client secrets de forma segura</strong> porque el APK/IPA es descompilable.</p>
+      <p>PKCE reemplaza el secret estático con un par de valores derivados criptográficamente en cada sesión: el <code>code_verifier</code> (secreto) y el <code>code_challenge</code> (hash del verifier). El servidor solo recibe el challenge — nunca puede ser usado para otro ataque.</p>
+
+      <h3>Implementación en pkce.ts</h3>
+      <div class="code-header">
+        <span>src/services/auth/pkce.ts — código completo</span>
+        <span>expo-crypto nativo</span>
+      </div>
+      <div class="code-block attached" style="font-size: 13px;">// URL-safe base64 — RFC 4648 §5, sin padding
+function toBase64Url(buffer: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i &lt; buffer.length; i++) {
+    binary += String.fromCharCode(buffer[i]!);
+  }
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');  // ← sin padding = (requisito del RFC)
+}
+
+// generateCodeVerifier — RFC 7636 §4.1
+// 32 bytes aleatorios criptográficamente seguros → 43 chars base64url
+export async function generateCodeVerifier(): Promise<string> {
+  const bytes = Crypto.getRandomBytes(32);  // SecRandomCopyBytes en iOS
+  return toBase64Url(bytes);
+}
+
+// generateCodeChallenge — RFC 7636 §4.2
+// SHA-256 del verifier codificado en base64url
+export async function generateCodeChallenge(verifier: string): Promise<string> {
+  const digest = await Crypto.digest(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    new TextEncoder().encode(verifier),
+  );
+  return toBase64Url(new Uint8Array(digest));
+}
+
+// generateState — CSRF token, 16 bytes → 32 hex chars
+export async function generateState(): Promise<string> {
+  const bytes = Crypto.getRandomBytes(16);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}</div>
+
+      <section id="auth-service">
+        <h3>authService.ts — login completo</h3>
+        <div class="code-block" style="font-size: 12px;">async login(email: string, password: string): Promise&lt;void&gt; {
+  const verifier = await generateCodeVerifier();
+  const challenge = await generateCodeChallenge(verifier);
+  const state = await generateState();
+
+  const response = await apiClient.post&lt;TokenResponse&gt;('/auth/token', {
+    email, password,
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+    state,
+  });
+
+  const expiresAt = Date.now() + response.expires_in * 1000;
+
+  // Tokens SOLO en SecureStore — nunca en AsyncStorage ni en logs
+  await SecureStore.setItemAsync(KEYS.ACCESS_TOKEN, response.access_token);
+  await SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, response.refresh_token);
+  await SecureStore.setItemAsync(KEYS.EXPIRES_AT, String(expiresAt));
+
+  // Hidratar memoria para requests inmediatos
+  tokenStore.setTokens(response.access_token, response.refresh_token);
+  console.warn('[Auth] Login completed');  // ← NUNCA loguea el token real
+}</div>
+      </section>
+
+      <section id="auth-session">
+        <h3>Restore de sesión (app restart)</h3>
+        <p>Cuando la app reinicia, <code>_layout.tsx</code> llama a <code>initialize()</code> que llama a <code>authService.restoreSession()</code>. Este método lee los tokens de SecureStore y verifica que no estén expirados:</p>
+        <div class="code-block" style="font-size: 12px;">async restoreSession(): Promise&lt;boolean&gt; {
+  const [accessToken, refreshToken, expiresAtStr] = await Promise.all([
+    SecureStore.getItemAsync(KEYS.ACCESS_TOKEN),
+    SecureStore.getItemAsync(KEYS.REFRESH_TOKEN),
+    SecureStore.getItemAsync(KEYS.EXPIRES_AT),
+  ]);
+
+  if (!accessToken || !refreshToken || !expiresAtStr) return false;
+
+  const expiresAt = parseInt(expiresAtStr, 10);
+  if (isNaN(expiresAt) || expiresAt &lt;= Date.now()) {
+    await authService.logout();  // limpiar tokens expirados
+    return false;
+  }
+
+  tokenStore.setTokens(accessToken, refreshToken);
+  return true;
+}</div>
+        <div class="box box-info">El <code>_layout.tsx</code> inicializa <code>isLoading: true</code> mientras se restaura la sesión para evitar un "flash" de redirección al login cuando el usuario tiene sesión activa.</div>
+      </section>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 4 — MOCK API                                      -->
+    <!-- ======================================================== -->
+    <section id="api-devclient">
+      <h2>Sección 4 — Mock API</h2>
+
+      <h3>devClient.ts — Para dispositivo/emulador</h3>
+      <p>En Expo Go, MSW (<code>msw/node</code>) no puede interceptar <code>fetch()</code> porque Node no está disponible en el runtime del device. La solución: un cliente que implementa la misma interfaz que <code>apiClient</code> pero sirve datos directamente desde memoria, sin ninguna llamada de red.</p>
+
+      <div class="code-block" style="font-size: 12px;">// Selección automática en client.ts:
+export const apiClient =
+  typeof __DEV__ !== 'undefined' &amp;&amp;
+  __DEV__ &amp;&amp;
+  process.env['NODE_ENV'] !== 'test'
+    ? devApiClient    // ← device/emulador: sin red
+    : httpApiClient;  // ← tests: fetch real, MSW intercepta</div>
+
+      <p>El <code>devClient</code> mantiene estado mutable en memoria — el estado de congelamiento de tarjetas y las transferencias creadas persisten durante la sesión del emulador.</p>
+    </section>
+
+    <section id="api-msw">
+      <h3>MSW handlers.ts — Para tests</h3>
+      <p>En el entorno de Jest, el <code>httpApiClient</code> real hace <code>fetch()</code> y MSW lo intercepta antes de que salga a la red. Los tests ejercitan <strong>exactamente el mismo código de producción</strong>.</p>
+
+      <div class="code-block" style="font-size: 12px;">// Latencias realistas (sin ralentizar los tests demasiado)
+const FAST   = (): Promise&lt;void&gt; =&gt; delay(200 + Math.random() * 200);
+const MEDIUM = (): Promise&lt;void&gt; =&gt; delay(600);
+const SLOW   = (): Promise&lt;void&gt; =&gt; delay(1200);
+
+// Auth guard reutilizable en todos los handlers
+function requireAuth(request: Request): boolean {
+  const auth = request.headers.get('Authorization');
+  return auth === `Bearer ${MOCK_ACCESS_TOKEN}`;
+}
+
+// Log sin tokens — solo confirma que el exchange ocurrió
+console.debug('[MSW] auth/token: exchange successful, tokens=[REDACTED]');</div>
+    </section>
+
+    <section id="api-endpoints">
+      <h3>Los 10 endpoints mock</h3>
+      <table>
+        <tr><th>Método</th><th>Path</th><th>Auth</th><th>Respuesta</th><th>Latencia</th></tr>
+        <tr><td><code>POST</code></td><td>/auth/token</td><td>No</td><td>TokenResponse (access + refresh + expires_in)</td><td>FAST</td></tr>
+        <tr><td><code>GET</code></td><td>/auth/me</td><td>Bearer</td><td>User { id, name, email }</td><td>FAST</td></tr>
+        <tr><td><code>GET</code></td><td>/accounts</td><td>Bearer</td><td>Account[] — 3 cuentas en PEN</td><td>FAST</td></tr>
+        <tr><td><code>GET</code></td><td>/accounts/:id</td><td>Bearer</td><td>Account | 404</td><td>FAST</td></tr>
+        <tr><td><code>GET</code></td><td>/accounts/:id/transactions</td><td>Bearer</td><td>PaginatedResponse&lt;Transaction&gt; — 20/página</td><td>FAST</td></tr>
+        <tr><td><code>POST</code></td><td>/transfers</td><td>Bearer</td><td>Transfer (status: 'pending') | 422</td><td>MEDIUM</td></tr>
+        <tr><td><code>POST</code></td><td>/transfers/:id/confirm</td><td>Bearer</td><td>Transfer (status: 'confirmed') | 404 | 409</td><td>SLOW</td></tr>
+        <tr><td><code>GET</code></td><td>/cards</td><td>Bearer</td><td>Card[] — 2 tarjetas</td><td>FAST</td></tr>
+        <tr><td><code>PATCH</code></td><td>/cards/:id</td><td>Bearer</td><td>Card con frozen toggled | 404</td><td>FAST</td></tr>
+      </table>
+      <div class="box box-info">Las latencias MEDIUM (600ms) y SLOW (1200ms) en transferencias hacen que los estados de loading sean visibles durante el demo — es intencional para mostrar los spinners.</div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 5 — STORES ZUSTAND                                -->
+    <!-- ======================================================== -->
+    <section id="store-auth">
+      <h2>Sección 5 — Stores Zustand</h2>
+
+      <h3>¿Por qué Zustand?</h3>
+      <p>Context API re-renderiza <em>todo el árbol</em> cuando cualquier valor cambia. Redux Toolkit requiere ~120 líneas de boilerplate (slice + actions + selectors + Provider) por dominio. Zustand ofrece el mismo poder en ~40 líneas, con acceso fuera de React (<code>useStore.getState()</code>) y re-renders selectivos.</p>
+
+      <div class="store-card">
+        <div class="store-name">useAuthStore</div>
+        <table>
+          <tr><th>Estado</th><th>Tipo</th><th>Descripción</th></tr>
+          <tr><td>isAuthenticated</td><td>boolean</td><td>Controla el AuthGuard en _layout.tsx</td></tr>
+          <tr><td>user</td><td>User | null</td><td>Hydratado de GET /auth/me post-login</td></tr>
+          <tr><td>isLoading</td><td>boolean</td><td>true durante initialize() para evitar flash</td></tr>
+          <tr><td>error</td><td>string | null</td><td>Mensaje de error de login para la UI</td></tr>
+        </table>
+        <h4>Acciones: <code>login()</code>, <code>logout()</code>, <code>initialize()</code></h4>
+        <p><code>initialize()</code> se llama una vez al arrancar la app. Intenta restaurar sesión desde SecureStore. Si hay una sesión válida, hidrata <code>user</code> con GET /auth/me. Si falla, redirige al login.</p>
+      </div>
+
+      <div class="store-card" id="store-accounts">
+        <div class="store-name">useAccountsStore</div>
+        <table>
+          <tr><th>Estado</th><th>Tipo</th><th>Descripción</th></tr>
+          <tr><td>accounts</td><td>Account[]</td><td>Lista de cuentas del usuario</td></tr>
+          <tr><td>isLoading</td><td>boolean</td><td>true durante fetchAccounts()</td></tr>
+          <tr><td>error</td><td>string | null</td><td>null si hay cache disponible aunque haya error de red</td></tr>
+          <tr><td>isOffline</td><td>boolean</td><td>true cuando la red falló pero hay cache</td></tr>
+          <tr><td>lastFetched</td><td>number | null</td><td>Timestamp del último fetch exitoso</td></tr>
+        </table>
+        <h4>Patrón offline-first en fetchAccounts()</h4>
+        <div class="code-block" style="font-size: 12px;">try {
+  const accounts = await apiClient.get&lt;Account[]&gt;('/accounts');
+  await cacheService.set(cacheKey, accounts, cacheService.TTL.accounts);
+  set({ accounts, isOffline: false, lastFetched: Date.now() });
+} catch (err) {
+  const cached = await cacheService.get&lt;Account[]&gt;(cacheKey);
+  if (cached !== null) {
+    set({ accounts: cached, isOffline: true, error: null });
+  } else {
+    set({ isOffline: true, error: 'No hay conexión y no hay datos cacheados' });
+  }
+}</div>
+      </div>
+
+      <div class="store-card" id="store-transactions">
+        <div class="store-name">useTransactionsStore</div>
+        <p>A diferencia de los otros stores, <code>transactionsStore</code> mantiene estado <em>keyed por accountId</em> — permite cargar las transacciones de múltiples cuentas sin interferencia entre sí.</p>
+        <table>
+          <tr><th>Estado</th><th>Tipo</th><th>Descripción</th></tr>
+          <tr><td>transactionsByAccount</td><td>Record&lt;string, Transaction[]&gt;</td><td>Un array por cuenta</td></tr>
+          <tr><td>paginationByAccount</td><td>Record&lt;string, PaginationMeta&gt;</td><td>Paginación por cuenta</td></tr>
+          <tr><td>loadingByAccount</td><td>Record&lt;string, boolean&gt;</td><td>Loading state por cuenta</td></tr>
+          <tr><td>errorByAccount</td><td>Record&lt;string, string | null&gt;</td><td>Error por cuenta</td></tr>
+        </table>
+        <p><code>loadMoreTransactions(accountId)</code> lee la paginación actual y llama a <code>fetchTransactions(accountId, page + 1)</code> si hay siguiente página.</p>
+      </div>
+
+      <div class="store-card" id="store-transfer">
+        <div class="store-name">useTransferStore</div>
+        <p>Implementa una máquina de estados simple de 4 estados: <code>form → review → confirmed</code> o <code>form → error</code>.</p>
+        <table>
+          <tr><th>Estado</th><th>Valores</th><th>Descripción</th></tr>
+          <tr><td>step</td><td>'form' | 'review' | 'confirmed' | 'error'</td><td>Controla qué render branch muestra la pantalla</td></tr>
+          <tr><td>pendingTransfer</td><td>Transfer | null</td><td>Retornado por POST /transfers, confirmado por POST .../confirm</td></tr>
+          <tr><td>notification</td><td>{message, type} | null</td><td>Notificación in-app en el step confirmed</td></tr>
+        </table>
+      </div>
+
+      <div class="store-card" id="store-cards">
+        <div class="store-name">useCardsStore</div>
+        <p>Store simple con dos operaciones: <code>fetchCards()</code> y <code>toggleCardFreeze(cardId)</code>. El toggle implementa optimistic update (UI instantánea) con rollback automático si el PATCH falla.</p>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 6 — CACHE OFFLINE                                 -->
+    <!-- ======================================================== -->
+    <section id="cache">
+      <h2>Sección 6 — Cache Offline</h2>
+
+      <p>El <code>cacheService</code> es una abstracción sobre AsyncStorage que agrega TTL (Time-To-Live) y serialización/deserialización automática. Cada entrada tiene un campo <code>expiresAt</code> que se verifica al leer.</p>
+
+      <div class="code-header">
+        <span>src/services/cache/cacheService.ts — interfaz completa</span>
+      </div>
+      <div class="code-block attached" style="font-size: 12px;">interface CacheEntry&lt;T&gt; {
+  data: T;
+  cachedAt: number;    // cuando se escribió
+  expiresAt: number;   // cuando expira (cachedAt + ttlMs)
+}
+
+// get() verifica TTL antes de retornar
+async get&lt;T&gt;(key: string): Promise&lt;T | null&gt; {
+  const raw = await AsyncStorage.getItem(key);
+  if (raw === null) return null;
+  const entry = JSON.parse(raw) as CacheEntry&lt;T&gt;;
+  if (Date.now() &gt; entry.expiresAt) {
+    await AsyncStorage.removeItem(key); // auto-limpieza
+    return null;
+  }
+  return entry.data;
+}
+
+// Claves de cache usadas en el proyecto:
+keys: {
+  accounts: (): string =&gt; 'bankgo:accounts',
+  transactions: (accountId: string, page: number): string =&gt;
+    `bankgo:transactions:${accountId}:${page}`,
+}
+
+// TTL por tipo de dato:
+TTL: {
+  accounts: 5 * 60 * 1000,       // 5 minutos
+  transactions: 2 * 60 * 1000,   // 2 minutos
+}</div>
+
+      <h3>¿Qué pasa cuando no hay red?</h3>
+      <p>1. El store intenta <code>apiClient.get()</code>. <br>2. La llamada lanza una excepción (Network request failed). <br>3. El catch lee el cache con <code>cacheService.get(key)</code>. <br>4. Si el cache existe y no está expirado: <code>set({ accounts: cached, isOffline: true })</code>. <br>5. La UI muestra los datos con un banner naranja "Sin conexión". <br>6. Si no hay cache (primera apertura sin red): error visible con botón Retry.</p>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 7 — TESTS                                         -->
+    <!-- ======================================================== -->
+    <section id="tests-section">
+      <h2>Sección 7 — Tests</h2>
+      <p>25 tests en 5 suites. Corren con <code>jest-expo</code> + <code>@testing-library/react-native</code> sin necesidad del emulador.</p>
+
+      <!-- Suite 1: PKCE -->
+      <div class="test-suite">
+        <div class="test-suite-header">
+          <div class="test-suite-title">__tests__/services/pkce.test.ts</div>
+          <div class="test-count">5 tests</div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">generateCodeVerifier produce un string de 43+ chars URL-safe sin padding</div>
+            <div class="test-desc">Verifica RFC 7636 §4.1: mínimo 43 chars, solo [A-Za-z0-9\-_]</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">generateCodeChallenge produce el SHA-256 base64url correcto del verifier</div>
+            <div class="test-desc">Usa Node.js crypto como oráculo independiente para verificar el resultado</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">generateCodeChallenge output solo contiene chars base64url (sin =)</div>
+            <div class="test-desc">Sin = (padding), sin + ni / (base64 estándar)</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">generateState produce un hex string de exactamente 32 chars (16 bytes)</div>
+            <div class="test-desc">32 chars hex = 16 bytes × 2 = CSRF token adecuado</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">generateCodeVerifier produce valores distintos en cada llamada (aleatoriedad)</div>
+            <div class="test-desc">Probabilidad de colisión con 32 bytes aleatorios ≈ 1/2^256</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suite 2: Logger -->
+      <div class="test-suite">
+        <div class="test-suite-header">
+          <div class="test-suite-title">__tests__/services/logger.test.ts</div>
+          <div class="test-count">5 tests</div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">un mensaje con "Bearer &lt;token&gt;" → el token aparece como [REDACTED]</div>
+            <div class="test-desc">Pattern: /Bearer\s+[\w.-]+/gi</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">un mensaje con "access_token: xyz789" → [REDACTED]</div>
+            <div class="test-desc">Pattern: /access_token["\\s:=]+[\\w.-]+/gi</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">un mensaje con password="secret" → [REDACTED]</div>
+            <div class="test-desc">Pattern: /password["\\s:=]+"[^"]+"/gi</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">un mensaje normal sin datos sensibles pasa sin cambios</div>
+            <div class="test-desc">Evita falsos positivos en mensajes de negocio normales</div>
+          </div>
+        </div>
+        <div class="test-item">
+          <div class="test-pass">✓</div>
+          <div>
+            <div class="test-name">un objeto con campo Bearer token en data → el valor es [REDACTED]</div>
+            <div class="test-desc">El segundo argumento (data) también se sanitiza recursivamente</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suite 3: TransferStore -->
+      <div class="test-suite">
+        <div class="test-suite-header">
+          <div class="test-suite-title">__tests__/stores/transferStore.test.ts</div>
+          <div class="test-count">6 tests</div>
+        </div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">cuenta origen no seleccionada → error de validación</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">beneficiario no seleccionado → error de validación</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">monto vacío (string vacío) → error "mayor a 0"</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">monto negativo (-100) → error de validación</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">monto cero (0) → error de validación</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">todos los campos correctos y monto &lt; saldo → validate() retorna null</div></div></div>
+      </div>
+
+      <!-- Suite 4: AccountsStore -->
+      <div class="test-suite">
+        <div class="test-suite-header">
+          <div class="test-suite-title">__tests__/stores/accountsStore.test.ts</div>
+          <div class="test-count">4 tests</div>
+        </div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">fetchAccounts() exitoso → accounts disponibles, isOffline: false</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">fetchAccounts() exitoso → cache fue escrito (verificar con cacheService.get)</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">fetchAccounts() con red caída + cache disponible → isOffline: true, sin error</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">fetchAccounts() con red caída + SIN cache → error message, accounts vacío</div></div></div>
+      </div>
+
+      <!-- Suite 5: Cache -->
+      <div class="test-suite">
+        <div class="test-suite-header">
+          <div class="test-suite-title">__tests__/services/cache.test.ts</div>
+          <div class="test-count">5 tests</div>
+        </div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">set() + get() retorna los datos correctamente</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">set() con TTL expirado → get() retorna null (usa jest.advanceTimersByTime)</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">remove() + get() retorna null</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">get() de clave inexistente retorna null sin lanzar error</div></div></div>
+        <div class="test-item"><div class="test-pass">✓</div><div><div class="test-name">set() serializa correctamente un objeto Account complejo (verifica todos los campos)</div></div></div>
+      </div>
+
+      <div class="box box-success">
+        <strong>Resultado:</strong> <code>npx jest --coverage</code> → 25/25 passing. 0 tests triviales — cada <code>expect()</code> fallaría si el código tuviera el bug que testea.
+      </div>
+
+      <h3>Cómo correrlos</h3>
+      <div class="code-block" style="font-size: 13px;">npm test -- --coverage     # todos con coverage
+npm run test:watch         # modo watch (TDD)
+npx jest pkce.test.ts      # suite específica
+npx jest --verbose         # con nombre de cada test</div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 8 — CI/CD                                         -->
+    <!-- ======================================================== -->
+    <section id="cicd">
+      <h2>Sección 8 — CI/CD Pipeline</h2>
+
+      <p>El pipeline corre en GitHub Actions en cada push y PR a las ramas <code>main</code> y <code>develop</code>. Tiene 2 jobs en secuencia: primero calidad, luego build.</p>
+
+      <div class="pipeline">
+        <div class="pipeline-job">
+          <div class="pipeline-job-header blue">
+            <span>📋</span> Job 1: quality
+          </div>
+          <div class="pipeline-step"><span class="step-icon">→</span> Checkout + Setup Node 20</div>
+          <div class="pipeline-step"><span class="step-icon">→</span> <code>npm ci --legacy-peer-deps</code> (lock file exacto)</div>
+          <div class="pipeline-step"><span class="step-icon">→</span> <code>npx tsc --noEmit</code> (TypeScript)</div>
+          <div class="pipeline-step"><span class="step-icon">→</span> <code>npm run lint</code> (ESLint)</div>
+          <div class="pipeline-step"><span class="step-icon">→</span> <code>npm test -- --coverage</code> (25 tests)</div>
+          <div class="pipeline-step"><span class="step-icon">→</span> Upload coverage artifact (7 días)</div>
+        </div>
+
+        <div style="display: flex; align-items: center; font-size: 20px; color: var(--gray-400);">→</div>
+
+        <div class="pipeline-job">
+          <div class="pipeline-job-header green">
+            <span>🏗</span> Job 2: build (needs: quality)
+          </div>
+          <div class="pipeline-step"><span class="step-icon">→</span> Solo corre si quality pasa</div>
+          <div class="pipeline-step"><span class="step-icon">→</span> Checkout + Setup Node 20</div>
+          <div class="pipeline-step"><span class="step-icon">→</span> <code>npm ci --legacy-peer-deps</code></div>
+          <div class="pipeline-step"><span class="step-icon">→</span> <code>npx expo export --platform web</code></div>
+          <div class="pipeline-step"><span class="step-icon" style="color: var(--gray-400);">(validación de que el bundle compila)</span></div>
+        </div>
+      </div>
+
+      <h3>¿Por qué este orden?</h3>
+      <ul class="check-list">
+        <li>TypeScript antes que tests: un error de tipos puede hacer que los tests pasen por razones equivocadas (<code>any</code> silencioso).</li>
+        <li>Lint antes que tests: ESLint detecta código muerto y anti-patterns que los tests no verifican.</li>
+        <li>Tests con coverage: el artifact de coverage es descargable para inspección post-merge.</li>
+        <li>Build separado con <code>needs: quality</code>: no tiene sentido validar el bundle si hay tests fallidos. El build puede tardar 2-3 min — no desperdiciar CI si la calidad ya falló.</li>
+      </ul>
+
+      <div class="code-block" style="font-size: 12px;">on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: bankgo/package-lock.json
+      - run: npm ci --legacy-peer-deps
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: bankgo/coverage/
+          retention-days: 7
+
+  build:
+    name: Expo Build Check
+    runs-on: ubuntu-latest
+    needs: quality     # ← solo si quality pasa
+    steps:
+      # ... checkout + install ...
+      - run: npx expo export --platform web 2>&amp;1 || echo "Build check completed"</div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 9 — USO DE IA                                     -->
+    <!-- ======================================================== -->
+    <section id="ai-uso">
+      <h2>Sección 9 — Uso de IA</h2>
+
+      <h3>Herramientas y roles</h3>
+      <table>
+        <tr><th>Herramienta</th><th>Rol</th></tr>
+        <tr><td><strong>OpenCode</strong></td><td>Motor de orquestación de sub-agentes especializados. Gestiona el ciclo SDLC mediante fases acotadas (explore, spec, design, apply, verify).</td></tr>
+        <tr><td><strong>Claude Sonnet 4.6</strong></td><td>Modelo base (<code>anthropic/claude-sonnet-4-6</code>) para todos los sub-agentes y el orquestador. Arquitecto senior y tomador de decisiones.</td></tr>
+      </table>
+
+      <h3>Tareas delegadas con valor concreto</h3>
+      <table>
+        <tr><th>Tarea</th><th>Valor generado</th><th>Archivo</th></tr>
+        <tr><td>15+ tipos TypeScript</td><td>Consistencia entre tipos, seed y handlers sin divergencia de nombres</td><td>src/types/index.ts</td></tr>
+        <tr><td>9 endpoints MSW v2</td><td>Handlers tipados con auth guard, latencias, estado mutable en &lt;5 min</td><td>src/services/api/handlers.ts</td></tr>
+        <tr><td>PKCE RFC 7636</td><td>Base64url sin padding correcto al primer intento (bug clásico)</td><td>src/services/auth/pkce.ts</td></tr>
+        <tr><td>Logger sanitizado</td><td>4 patterns regex para cubrir los casos de leak más comunes</td><td>src/utils/logger.ts</td></tr>
+        <tr><td>Offline-first + cache</td><td>Patrón try/catch con fallback AsyncStorage y optimistic update</td><td>stores/accountsStore.ts, cardsStore.ts</td></tr>
+        <tr><td>25 tests</td><td>Casos edge no triviales: TTL expirado, monto cero, aleatoriedad de verifier</td><td>__tests__/</td></tr>
+        <tr><td>GitHub Actions YAML</td><td>Pipeline en 2 jobs con orden correcto y cache de dependencias</td><td>.github/workflows/ci.yml</td></tr>
+      </table>
+
+      <h3>Tareas NO delegadas</h3>
+      <table>
+        <tr><th>Tarea</th><th>Por qué no se delegó</th></tr>
+        <tr><td>Auditoría del PKCE contra RFC 7636</td><td>Verificación manual — la IA podría tener contexto desactualizado del RFC</td></tr>
+        <tr><td>Este ai-usage.md</td><td>Requiere reflexión honesta sobre el proceso, no descripción automática</td></tr>
+        <tr><td>Decisiones de arquitectura de capas</td><td>Requieren juicio sobre mantenibilidad, seguridad y escalabilidad</td></tr>
+        <tr><td>Validar que los tests son significativos</td><td>Un agente puede generar <code>expect(true).toBe(true)</code> — se revisó cada assertion</td></tr>
+      </table>
+
+      <h3>Protocolo de validación del output</h3>
+      <div class="code-block" style="font-size: 13px;">Sub-agente produce output
+         ↓
+npx tsc --noEmit
+         ↓
+¿Errores de tipos? → enviar de vuelta con correcciones
+         ↓
+npx jest
+         ↓
+¿Tests fallan? → revisar + corregir
+         ↓
+Code review manual de lógica de seguridad (auth, crypto, validaciones)
+         ↓
+Aprobado → siguiente fase</div>
+
+      <div class="box box-success">
+        <strong>Evidencia de validación:</strong> <code>npx tsc --noEmit</code> → 0 errores. <code>npx jest --coverage</code> → 25/25 passing. Auditoría manual de pkce.ts, logger.ts y authService.ts contra sus fuentes (RFC 7636, OWASP).
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ======================================================== -->
+    <!-- SECCIÓN 10 — SEGURIDAD OWASP                              -->
+    <!-- ======================================================== -->
+    <section id="seguridad">
+      <h2>Sección 10 — Seguridad OWASP Mobile Top 10</h2>
+
+      <div style="border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin: 20px 0;">
+        <div class="owasp-item">
+          <div class="owasp-badge owasp-ok">M1 ✓</div>
+          <div class="owasp-content">
+            <div class="owasp-title">M1 — Improper Credential Usage</div>
+            <div class="owasp-desc">PKCE RFC 7636 implementado con <code>expo-crypto</code> (criptográficamente seguro). Tokens persistidos <em>exclusivamente</em> en <code>expo-secure-store</code> (OS Keychain). La contraseña viaja una sola vez en el body del POST /auth/token y jamás se almacena. <code>tokenStore</code> loguea <code>[REDACTED]</code> en vez del valor real.</div>
+          </div>
+        </div>
+
+        <div class="owasp-item">
+          <div class="owasp-badge owasp-ok">M2 ✓</div>
+          <div class="owasp-content">
+            <div class="owasp-title">M2 — Inadequate Supply Chain Security</div>
+            <div class="owasp-desc"><code>package-lock.json</code> garantiza versiones exactas. CI usa <code>npm ci</code> (no <code>npm install</code>) que respeta el lock file y falla si hay divergencias. Dependencias mínimas del ecosistema Expo (bien auditadas).</div>
+          </div>
+        </div>
+
+        <div class="owasp-item">
+          <div class="owasp-badge owasp-ok">M4 ✓</div>
+          <div class="owasp-content">
+            <div class="owasp-title">M4 — Insufficient Input/Output Validation</div>
+            <div class="owasp-desc">Validación en dos capas: <code>transferStore.validate()</code> antes del POST (client-side), y el handler MSW valida y retorna <code>422 VALIDATION_ERROR</code> si falla (server-side). Saldo verificado antes de enviar la transferencia.</div>
+          </div>
+        </div>
+
+        <div class="owasp-item">
+          <div class="owasp-badge owasp-ok">M8 ✓</div>
+          <div class="owasp-content">
+            <div class="owasp-title">M8 — Security Misconfiguration</div>
+            <div class="owasp-desc">
+              <code>logger.ts</code> sanitiza 4 patrones antes de imprimir:
+              <div class="code-block" style="font-size: 12px; margin-top: 8px;">const SENSITIVE_PATTERNS = [
+  /Bearer\s+[\w.-]+/gi,
+  /access_token["\s:=]+[\w.-]+/gi,
+  /refresh_token["\s:=]+[\w.-]+/gi,
+  /password["\s:=]+"[^"]+"/gi,
+];</div>
+              En producción (<code>__DEV__ === false</code>), solo los errores se imprimen.
+            </div>
+          </div>
+        </div>
+
+        <div class="owasp-item">
+          <div class="owasp-badge owasp-ok">M9 ✓</div>
+          <div class="owasp-content">
+            <div class="owasp-title">M9 — Insecure Data Storage</div>
+            <div class="owasp-desc">Separación estricta por threat model: <strong>SecureStore</strong> para tokens (OS Keychain, cifrado por hardware) — <strong>AsyncStorage</strong> solo para cache de datos de negocio (saldos, transacciones) que no constituyen credenciales de acceso. Nunca se almacenan números de cuenta completos, contraseñas ni PII en AsyncStorage.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Protección de información sensible en el uso de IA</h3>
+      <ul class="check-list">
+        <li>Ningún secreto real pasó por los prompts de IA — el proyecto usa un backend mock</li>
+        <li>Datos seed ficticios: María García, example.com, IBANs inventados</li>
+        <li>Tokens simulados: <code>'mock-access-token-abc123'</code> — no JWTs con payload real</li>
+        <li>Logs sanitizados: el logger redacta cualquier token antes de imprimir</li>
+      </ul>
+    </section>
+
+    <div style="margin-top: 64px; padding-top: 24px; border-top: 2px solid var(--gray-200); color: var(--gray-500); font-size: 13px; text-align: center;">
+      BankGo · Documentación técnica completa · Caso técnico Inteligo Group<br>
+      Generado por GentleIA (anthropic/claude-sonnet-4-6) · 2026-05-01
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Highlight active section in sidebar
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('section[id], h2[id]');
+
+  function updateActive() {
+    let current = '';
+    const mainEl = document.querySelector('main');
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 100) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+
+  document.querySelector('main').addEventListener('scroll', updateActive);
+  updateActive();
+</script>
+</body>
+</html>

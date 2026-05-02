@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BankGo — Presentación de Sustentación · Inteligo Group</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-900: #1e3a8a;
+      --blue-700: #1d4ed8;
+      --blue-600: #2563eb;
+      --blue-500: #3b82f6;
+      --blue-400: #60a5fa;
+      --blue-200: #bfdbfe;
+      --blue-100: #dbeafe;
+      --gray-900: #111827;
+      --gray-800: #1f2937;
+      --gray-700: #374151;
+      --gray-600: #4b5563;
+      --gray-400: #9ca3af;
+      --gray-300: #d1d5db;
+      --gray-200: #e5e7eb;
+      --gray-100: #f3f4f6;
+      --white: #ffffff;
+      --green-500: #22c55e;
+      --green-400: #4ade80;
+      --yellow-400: #facc15;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-900);
+      color: var(--white);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Slide container */
+    .slides-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      padding: 56px 80px 40px;
+      background: linear-gradient(135deg, var(--blue-900) 0%, #0f2460 100%);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    /* Navigation bar */
+    .nav-bar {
+      background: rgba(0,0,0,0.5);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 32px;
+      flex-shrink: 0;
+    }
+
+    .nav-bar button {
+      background: var(--blue-600);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nav-bar button:hover { background: var(--blue-500); }
+    .nav-bar button:disabled { background: var(--gray-700); cursor: default; }
+
+    .slide-counter {
+      font-size: 14px;
+      color: var(--blue-200);
+      font-weight: 500;
+    }
+
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--gray-600);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .dot.active { background: var(--blue-400); }
+
+    /* Typography */
+    .slide-number {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue-400);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--blue-600);
+      padding-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--blue-200);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: var(--blue-200);
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* Bullets */
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .bullet-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 17px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.9);
+    }
+    .bullet-list li::before {
+      content: '▸';
+      color: var(--blue-400);
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      color: rgba(255,255,255,0.9);
+    }
+    .check-list li::before {
+      content: '✓';
+      color: var(--green-400);
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    th {
+      background: rgba(37, 99, 235, 0.4);
+      color: var(--blue-200);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.85);
+    }
+    tr:hover td { background: rgba(255,255,255,0.04); }
+
+    /* Code */
+    .code-block {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 18px 20px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre;
+      overflow-x: auto;
+      color: #e2e8f0;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-blue { background: var(--blue-600); color: white; }
+    .badge-green { background: #16a34a; color: white; }
+    .badge-yellow { background: #d97706; color: white; }
+    .badge-gray { background: var(--gray-700); color: var(--gray-300); }
+
+    /* Tag chips */
+    .tag { background: rgba(37,99,235,0.25); color: var(--blue-200); border: 1px solid rgba(37,99,235,0.4); border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 600; display: inline-block; margin: 3px; }
+
+    /* Diagram */
+    .arch-diagram {
+      background: #0f1929;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid rgba(37,99,235,0.3);
+    }
+
+    /* Step list */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: var(--blue-600);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .step-content {
+      flex: 1;
+      padding-top: 4px;
+    }
+
+    .separator { height: 1px; background: rgba(255,255,255,0.1); margin: 16px 0; }
+
+    .highlight { color: var(--blue-400); font-weight: 700; }
+    .dim { color: rgba(255,255,255,0.5); font-size: 13px; }
+
+    /* Slide 1 specific */
+    .hero-logo {
+      font-size: 72px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #60a5fa, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    /* Owasp table */
+    .owasp-row-ok td:first-child { color: var(--green-400); font-weight: 700; }
+    .owasp-row-pending td:first-child { color: var(--yellow-400); font-weight: 700; }
+
+    /* Scale proposal boxes */
+    .scale-box {
+      background: rgba(255,255,255,0.05);
+      border-left: 3px solid var(--blue-500);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="slides-wrapper">
+
+  <!-- ============================================================ SLIDE 1 -->
+  <section class="slide active" id="slide-1">
+    <div class="slide-number">01 / 14</div>
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+      <div class="hero-logo">BankGo</div>
+      <p class="subtitle" style="font-size: 24px; margin-bottom: 32px;">AI Software Engineer · Caso Técnico</p>
+      <div class="card" style="max-width: 600px; width: 100%;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; text-align: center;">
+          <div>
+            <div class="dim">Empresa</div>
+            <div style="font-size: 18px; font-weight: 700; margin-top: 4px;">Inteligo Group</div>
+          </div>
+          <div>
+            <div class="dim">Fecha</div>
+            <div style="font-size: 18px; font-weight: 700; margin-top: 4px;">Mayo 2026</div>
+          </div>
+          <div>
+            <div class="dim">Arquitecto</div>
+            <div style="font-size: 18px; font-weight: 700; margin-top: 4px;">GentleIA</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+        <span class="tag">React Native 0.81.5</span>
+        <span class="tag">Expo SDK 54</span>
+        <span class="tag">TypeScript 5.3</span>
+        <span class="tag">Zustand 5</span>
+        <span class="tag">MSW 2</span>
+        <span class="tag">PKCE RFC 7636</span>
+        <span class="tag">25 Tests</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 2 -->
+  <section class="slide" id="slide-2">
+    <div class="slide-number">02 / 14</div>
+    <h2>¿Qué es BankGo?</h2>
+    <div class="card-grid cols-2" style="gap: 24px; flex: 1;">
+      <div>
+        <h3>Contexto</h3>
+        <ul class="bullet-list" style="margin-top: 12px;">
+          <li>App móvil de banca personal para <strong>Inteligo Group</strong>, desarrollada como caso técnico de evaluación para el rol de AI Software Engineer.</li>
+          <li>Demuestra capacidad de construir una aplicación bancaria completa, con arquitectura limpia, seguridad OWASP y testing, usando IA como herramienta supervisada.</li>
+          <li>Funciona 100% offline (sin servidor real) usando un mock API completo con datos peruanos realistas (PEN, Inteligo SAB, Miraflores).</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Objetivo técnico</h3>
+        <ul class="check-list" style="margin-top: 12px;">
+          <li>Autenticación con PKCE (RFC 7636)</li>
+          <li>Dashboard con 3 cuentas bancarias</li>
+          <li>Transacciones paginadas por cuenta</li>
+          <li>Transferencias en flujo de 3 pasos</li>
+          <li>Gestión de tarjetas (congelar/descongelar)</li>
+          <li>Modo offline con cache TTL</li>
+          <li>25 tests unitarios en 5 suites</li>
+          <li>CI/CD con GitHub Actions</li>
+          <li>Uso documentado y validado de IA</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-top: 20px;">
+      <p><span class="highlight">Usuario de prueba:</span> <code style="color: #60a5fa;">maria.garcia@example.com</code> · contraseña: <code style="color: #60a5fa;">cualquier valor con 4+ caracteres</code></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 3 -->
+  <section class="slide" id="slide-3">
+    <div class="slide-number">03 / 14</div>
+    <h2>Arquitectura en Capas</h2>
+    <div class="arch-diagram">
+      <div style="display: grid; grid-template-rows: auto auto auto auto; gap: 8px; font-family: monospace; font-size: 14px;">
+
+        <div style="background: rgba(37,99,235,0.2); border: 1px solid rgba(37,99,235,0.5); border-radius: 8px; padding: 12px 20px;">
+          <div style="color: var(--blue-400); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">■ Presentation Layer — app/</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span class="tag">login.tsx</span><span class="tag">dashboard.tsx</span><span class="tag">transfer.tsx</span><span class="tag">cards.tsx</span><span class="tag">account/[id].tsx</span><span class="tag">_layout.tsx (AuthGuard)</span>
+          </div>
+        </div>
+
+        <div style="text-align: center; color: var(--blue-400); font-size: 22px; line-height: 1;">↕</div>
+
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16,185,129,0.4); border-radius: 8px; padding: 12px 20px;">
+          <div style="color: #34d399; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">■ Domain Layer — src/stores/</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span style="background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 600;">useAuthStore</span>
+            <span style="background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 600;">useAccountsStore</span>
+            <span style="background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 600;">useTransactionsStore</span>
+            <span style="background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 600;">useTransferStore</span>
+            <span style="background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 600;">useCardsStore</span>
+          </div>
+        </div>
+
+        <div style="text-align: center; color: #34d399; font-size: 22px; line-height: 1;">↕</div>
+
+        <div style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.4); border-radius: 8px; padding: 12px 20px;">
+          <div style="color: #fbbf24; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">■ Infrastructure Layer — src/services/</div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+            <div style="background: rgba(245,158,11,0.1); border-radius: 6px; padding: 8px 12px;">
+              <div style="color: #fde68a; font-size: 12px; font-weight: 700; margin-bottom: 4px;">api/</div>
+              <div style="color: rgba(255,255,255,0.7); font-size: 12px;">client.ts · devClient.ts<br/>handlers.ts · seed.ts</div>
+            </div>
+            <div style="background: rgba(245,158,11,0.1); border-radius: 6px; padding: 8px 12px;">
+              <div style="color: #fde68a; font-size: 12px; font-weight: 700; margin-bottom: 4px;">auth/</div>
+              <div style="color: rgba(255,255,255,0.7); font-size: 12px;">authService.ts · pkce.ts<br/>tokenStore.ts</div>
+            </div>
+            <div style="background: rgba(245,158,11,0.1); border-radius: 6px; padding: 8px 12px;">
+              <div style="color: #fde68a; font-size: 12px; font-weight: 700; margin-bottom: 4px;">cache/</div>
+              <div style="color: rgba(255,255,255,0.7); font-size: 12px;">cacheService.ts<br/>TTL: 5min/2min</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: center; color: #fbbf24; font-size: 22px; line-height: 1;">↕</div>
+
+        <div style="background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.4); border-radius: 8px; padding: 12px 20px;">
+          <div style="color: #c4b5fd; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">■ Device Storage</div>
+          <div style="display: flex; gap: 16px;">
+            <div style="flex: 1; background: rgba(139,92,246,0.15); border-radius: 6px; padding: 8px 12px;">
+              <span style="color: #ddd6fe; font-size: 13px; font-weight: 700;">expo-secure-store</span>
+              <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 4px;">access_token · refresh_token · expires_at<br/><em>OS Keychain — cifrado por hardware</em></p>
+            </div>
+            <div style="flex: 1; background: rgba(139,92,246,0.15); border-radius: 6px; padding: 8px 12px;">
+              <span style="color: #ddd6fe; font-size: 13px; font-weight: 700;">AsyncStorage</span>
+              <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 4px;">bankgo:accounts · bankgo:transactions:id:page<br/><em>Cache de datos de negocio</em></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 4 -->
+  <section class="slide" id="slide-4">
+    <div class="slide-number">04 / 14</div>
+    <h2>Stack Tecnológico</h2>
+    <div class="card-grid cols-2" style="gap: 20px;">
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom: 14px;">Runtime &amp; Framework</h3>
+          <table>
+            <tr><th>Tecnología</th><th>Versión</th><th>Propósito</th></tr>
+            <tr><td>React Native</td><td><span class="badge badge-blue">0.81.5</span></td><td>UI cross-platform</td></tr>
+            <tr><td>Expo SDK</td><td><span class="badge badge-blue">54</span></td><td>Managed workflow</td></tr>
+            <tr><td>expo-router</td><td><span class="badge badge-blue">6.0.23</span></td><td>File-based routing</td></tr>
+            <tr><td>React</td><td><span class="badge badge-blue">19.1.0</span></td><td>UI library</td></tr>
+            <tr><td>TypeScript</td><td><span class="badge badge-blue">5.3.3</span></td><td>Type safety</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom: 14px;">Estado &amp; Testing</h3>
+          <table>
+            <tr><th>Tecnología</th><th>Versión</th><th>Propósito</th></tr>
+            <tr><td>Zustand</td><td><span class="badge badge-green">5.0.12</span></td><td>State management</td></tr>
+            <tr><td>MSW</td><td><span class="badge badge-green">2.14.2</span></td><td>Mock Service Worker</td></tr>
+            <tr><td>Jest + jest-expo</td><td><span class="badge badge-green">29.7</span></td><td>Testing framework</td></tr>
+            <tr><td>expo-crypto</td><td><span class="badge badge-green">15.0.9</span></td><td>PKCE / SHA-256</td></tr>
+            <tr><td>expo-secure-store</td><td><span class="badge badge-green">15.0.8</span></td><td>OS Keychain</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom: 14px;">Almacenamiento</h3>
+          <table>
+            <tr><th>Módulo</th><th>Uso</th><th>Motivo</th></tr>
+            <tr><td>async-storage</td><td>Cache TTL</td><td>Plain text para datos de negocio</td></tr>
+            <tr><td>expo-secure-store</td><td>Tokens</td><td>OS Keychain — datos sensibles</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom: 14px;">Calidad &amp; CI</h3>
+          <table>
+            <tr><th>Herramienta</th><th>Versión</th><th>Propósito</th></tr>
+            <tr><td>ESLint</td><td><span class="badge badge-gray">8.57</span></td><td>Linting</td></tr>
+            <tr><td>Prettier</td><td><span class="badge badge-gray">3.8</span></td><td>Formateo</td></tr>
+            <tr><td>GitHub Actions</td><td>—</td><td>CI/CD Pipeline</td></tr>
+            <tr><td>Yarn</td><td><span class="badge badge-gray">4.10.2</span></td><td>Package manager</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 5 -->
+  <section class="slide" id="slide-5">
+    <div class="slide-number">05 / 14</div>
+    <h2>Funcionalidades Implementadas</h2>
+    <div class="card-grid cols-2" style="gap: 20px;">
+      <div class="card">
+        <h3>🔐 Autenticación</h3>
+        <ul class="check-list" style="margin-top: 12px;">
+          <li>Login con email + contraseña</li>
+          <li>Flujo PKCE RFC 7636 (verifier + challenge SHA-256)</li>
+          <li>Tokens en expo-secure-store (OS Keychain)</li>
+          <li>Restore de sesión al reiniciar la app</li>
+          <li>AuthGuard en root layout (redirección automática)</li>
+          <li>Logout con limpieza de SecureStore</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🏦 Dashboard &amp; Cuentas</h3>
+        <ul class="check-list" style="margin-top: 12px;">
+          <li>3 cuentas: Corriente, Ahorros, Inversiones</li>
+          <li>Saldo en PEN con formato localizado (es-PE)</li>
+          <li>Pull-to-refresh para actualizar datos</li>
+          <li>Banner offline cuando la red falla</li>
+          <li>Fallback a cache de AsyncStorage (TTL 5 min)</li>
+          <li>Transacciones paginadas (20 por página) con scroll infinito</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>💸 Transferencias</h3>
+        <ul class="check-list" style="margin-top: 12px;">
+          <li>Wizard de 3 pasos: Formulario → Revisión → Confirmado</li>
+          <li>Selección de cuenta origen y beneficiario</li>
+          <li>Validación de saldo disponible antes de enviar</li>
+          <li>3 beneficiarios mock (BCP, Interbank, BBVA)</li>
+          <li>Moneda PEN/USD seleccionable</li>
+          <li>Notificación in-app de éxito</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>💳 Tarjetas &amp; UX</h3>
+        <ul class="check-list" style="margin-top: 12px;">
+          <li>2 tarjetas (Visa + Mastercard) con diseño visual</li>
+          <li>Toggle congelar/descongelar con confirmación</li>
+          <li>Optimistic update (UI instantánea, reversal si falla)</li>
+          <li>Diálogo de confirmación antes de congelar</li>
+          <li>Estados UX completos: Loading / Error / Empty / Retry</li>
+          <li>Tab bar de navegación con 3 tabs</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 6 -->
+  <section class="slide" id="slide-6">
+    <div class="slide-number">06 / 14</div>
+    <h2>Flujo de Autenticación PKCE</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div>
+        <h3 style="margin-bottom: 16px;">¿Por qué PKCE en mobile?</h3>
+        <ul class="bullet-list">
+          <li>Las apps mobile no pueden guardar <em>client secrets</em> de forma segura (el APK es descompilable).</li>
+          <li>PKCE (RFC 7636) soluciona esto con un par <strong>verifier + challenge</strong> derivado criptográficamente.</li>
+          <li>Protege contra ataques de <em>authorization code interception</em>.</li>
+        </ul>
+        <div class="separator" style="margin: 20px 0;"></div>
+        <h3 style="margin-bottom: 12px;">Código real de pkce.ts</h3>
+        <div class="code-block">// generateCodeVerifier — RFC 7636 §4.1
+// 32 bytes → 43 chars base64url
+export async function generateCodeVerifier() {
+  const bytes = Crypto.getRandomBytes(32);
+  return toBase64Url(bytes); // sin padding =
+}
+
+// generateCodeChallenge — RFC 7636 §4.2
+// SHA-256 del verifier, base64url-encoded
+export async function generateCodeChallenge(v) {
+  const digest = await Crypto.digest(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    new TextEncoder().encode(v),
+  );
+  return toBase64Url(new Uint8Array(digest));
+}</div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 16px;">Flujo paso a paso</h3>
+        <div class="step-list">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <strong>Usuario ingresa email + password</strong>
+              <p class="dim">La contraseña nunca se almacena ni loguea</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <strong>generateCodeVerifier()</strong> — 32 bytes aleatorios → base64url (43 chars)
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <strong>generateCodeChallenge(verifier)</strong> — SHA-256 del verifier → base64url
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <strong>generateState()</strong> — 16 bytes → hex string (CSRF token)
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <strong>POST /auth/token</strong> con email, password, challenge, state
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+              <strong>Respuesta:</strong> access_token + refresh_token + expires_in (3600s)
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">7</div>
+            <div class="step-content">
+              <strong>SecureStore</strong> persiste los 3 valores: access, refresh, expires_at
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">8</div>
+            <div class="step-content">
+              <strong>tokenStore.setTokens()</strong> hidrata la memoria para requests inmediatos
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 7 -->
+  <section class="slide" id="slide-7">
+    <div class="slide-number">07 / 14</div>
+    <h2>Mock API — Sin necesidad de servidor real</h2>
+    <div class="card-grid cols-2" style="gap: 24px;">
+      <div>
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>devClient.ts — Para desarrollo en device</h3>
+          <p style="font-size: 15px; margin: 10px 0;">En Expo Go, MSW (msw/node) no puede interceptar fetch porque no corre un Service Worker. La solución: reemplazar el apiClient completo con un cliente que sirve los mismos datos <em>sin ninguna llamada de red</em>.</p>
+          <div class="code-block" style="font-size: 12px;">// client.ts — selección automática
+export const apiClient =
+  typeof __DEV__ !== 'undefined' &&
+  __DEV__ &&
+  process.env['NODE_ENV'] !== 'test'
+    ? devApiClient    // ← device/emulador
+    : httpApiClient;  // ← tests (MSW intercepta)</div>
+        </div>
+        <div class="card">
+          <h3>Rutas mock implementadas</h3>
+          <ul class="check-list" style="margin-top: 10px; font-size: 14px;">
+            <li>POST /auth/token</li>
+            <li>GET /auth/me</li>
+            <li>GET /accounts</li>
+            <li>GET /accounts/:id</li>
+            <li>GET /accounts/:id/transactions?page&amp;limit</li>
+            <li>POST /transfers</li>
+            <li>POST /transfers/:id/confirm</li>
+            <li>GET /cards</li>
+            <li>PATCH /cards/:id (toggle frozen)</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>MSW handlers.ts — Para tests</h3>
+          <p style="font-size: 15px; margin: 10px 0;">En el entorno de Jest, el httpApiClient real hace fetch() y MSW lo intercepta a nivel de Node. Los tests ejercitan el código <strong>exactamente igual que producción</strong>.</p>
+          <div class="code-block" style="font-size: 12px;">// handlers.ts — mismo código en test y dev
+http.post('/auth/token', async () => {
+  await FAST(); // 200-400ms simulados
+  return HttpResponse.json({
+    access_token: MOCK_ACCESS_TOKEN,
+    // Never log actual token
+  });
+}),
+
+http.get('/accounts', async ({ request }) => {
+  if (!requireAuth(request)) return unauthorized();
+  return HttpResponse.json(seedAccounts);
+}),</div>
+        </div>
+        <div class="card">
+          <h3 style="color: var(--yellow-400);">Estado in-memory stateful</h3>
+          <p style="font-size: 15px; margin-top: 8px;">Las transferencias y el estado de congelamiento de tarjetas se guardan en <code>Map&lt;string, Transfer&gt;</code> en memoria — sin base de datos, sin servidor, con estado consistente entre requests.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 8 -->
+  <section class="slide" id="slide-8">
+    <div class="slide-number">08 / 14</div>
+    <h2>Modo Offline — Cache TTL en AsyncStorage</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div>
+        <h3 style="margin-bottom: 16px;">Cómo funciona el patrón offline-first</h3>
+        <div class="step-list">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content"><strong>fetchAccounts()</strong> intenta llamada a red vía apiClient</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">Si <strong>éxito</strong>: escribe en AsyncStorage con TTL de 5 minutos (<code>expiresAt = Date.now() + 300_000</code>)</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">Si <strong>falla la red</strong>: lee la clave <code>bankgo:accounts</code> de AsyncStorage</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">Si hay cache <strong>válido</strong> (no expirado): muestra datos + banner <code>isOffline: true</code></div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">Si no hay cache: muestra <code>ErrorState</code> con botón de Retry</div>
+          </div>
+        </div>
+        <div class="separator"></div>
+        <div class="card" style="margin-top: 12px;">
+          <h3>TTL por tipo de dato</h3>
+          <table style="margin-top: 10px;">
+            <tr><th>Dato</th><th>Clave AsyncStorage</th><th>TTL</th></tr>
+            <tr><td>Cuentas</td><td>bankgo:accounts</td><td>5 minutos</td></tr>
+            <tr><td>Transacciones</td><td>bankgo:transactions:id:page</td><td>2 minutos</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 12px;">Código real de cacheService.ts</h3>
+        <div class="code-block" style="font-size: 13px;">// TTL constants
+const TTL_ACCOUNTS_MS = 5 * 60 * 1000;    // 5 min
+const TTL_TRANSACTIONS_MS = 2 * 60 * 1000; // 2 min
+
+interface CacheEntry&lt;T&gt; {
+  data: T;
+  cachedAt: number;
+  expiresAt: number;   // ← el que importa
+}
+
+async get&lt;T&gt;(key: string): Promise&lt;T | null&gt; {
+  const raw = await AsyncStorage.getItem(key);
+  if (raw === null) return null;
+  const entry = JSON.parse(raw) as CacheEntry&lt;T&gt;;
+
+  if (Date.now() > entry.expiresAt) {
+    await AsyncStorage.removeItem(key); // limpia
+    return null;   // ← TTL expirado
+  }
+
+  return entry.data;
+}</div>
+        <div class="card" style="margin-top: 16px; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.07);">
+          <p style="font-size: 14px;"><span style="color: var(--green-400); font-weight: 700;">✓ Validado por test:</span> cache.test.ts verifica que get() retorna null para TTL expirado usando <code>jest.advanceTimersByTime(2000)</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 9 -->
+  <section class="slide" id="slide-9">
+    <div class="slide-number">09 / 14</div>
+    <h2>Testing — 25 Tests en 5 Suites</h2>
+    <div class="card-grid cols-2" style="gap: 16px;">
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <span class="badge badge-blue">5 tests</span>
+          <h3>PKCE — RFC 7636</h3>
+        </div>
+        <ul class="check-list" style="font-size: 14px;">
+          <li>Verifier tiene 43+ chars URL-safe</li>
+          <li>Challenge = SHA-256 del verifier (verificado contra Node.js crypto como oráculo)</li>
+          <li>Challenge no contiene =, +, /</li>
+          <li>State = hex string de 32 chars</li>
+          <li>Verifier produce valores distintos en cada llamada (aleatoriedad)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <span class="badge badge-blue">5 tests</span>
+          <h3>Logger — Sanitización PII</h3>
+        </div>
+        <ul class="check-list" style="font-size: 14px;">
+          <li>Bearer token → [REDACTED]</li>
+          <li>access_token → [REDACTED]</li>
+          <li>password="" → [REDACTED]</li>
+          <li>Mensaje sin datos sensibles pasa sin cambios</li>
+          <li>Objeto con header Authorization sanitizado en el data arg</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <span class="badge badge-green">6 tests</span>
+          <h3>TransferStore — validate()</h3>
+        </div>
+        <ul class="check-list" style="font-size: 14px;">
+          <li>Sin cuenta origen → error</li>
+          <li>Sin beneficiario → error</li>
+          <li>Monto vacío → error</li>
+          <li>Monto negativo → error</li>
+          <li>Monto cero → error</li>
+          <li>Todos los campos correctos + saldo suficiente → null</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <span class="badge badge-green">4 tests</span>
+          <h3>AccountsStore — Offline</h3>
+        </div>
+        <ul class="check-list" style="font-size: 14px;">
+          <li>Fetch exitoso → accounts disponibles, isOffline: false</li>
+          <li>Fetch exitoso → cache fue escrito en AsyncStorage</li>
+          <li>Red caída + cache disponible → isOffline: true, sin error</li>
+          <li>Red caída + sin cache → error + accounts vacío</li>
+        </ul>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <span class="badge badge-yellow">5 tests</span>
+          <h3>CacheService — TTL y persistencia</h3>
+        </div>
+        <ul class="check-list" style="font-size: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <li>set() + get() retorna datos correctamente</li>
+          <li>TTL expirado → get() retorna null</li>
+          <li>remove() + get() retorna null</li>
+          <li>Clave inexistente → null sin error</li>
+          <li>Serializa objeto Account complejo sin perder campos</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-top: 12px; text-align: center;">
+      <code style="color: var(--blue-400); font-size: 16px;">npx jest --coverage</code>
+      <span style="margin: 0 16px; color: rgba(255,255,255,0.4);">→</span>
+      <span style="color: var(--green-400); font-weight: 700; font-size: 16px;">25/25 passing ✓</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 10 -->
+  <section class="slide" id="slide-10">
+    <div class="slide-number">10 / 14</div>
+    <h2>CI/CD Pipeline — GitHub Actions</h2>
+    <div class="card-grid cols-2" style="gap: 24px;">
+      <div>
+        <div class="card">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="background: var(--blue-600); border-radius: 8px; padding: 8px 12px; font-weight: 800; font-size: 18px;">1</div>
+            <h3 style="color: white; font-size: 20px;">Job: quality</h3>
+          </div>
+          <div class="step-list">
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">a</div>
+              <div class="step-content"><strong>Checkout</strong> + Setup Node 20</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">b</div>
+              <div class="step-content"><strong>npm ci --legacy-peer-deps</strong> — install exacto desde lock file</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">c</div>
+              <div class="step-content"><strong>npx tsc --noEmit</strong> — type check completo</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">d</div>
+              <div class="step-content"><strong>npm run lint</strong> — ESLint con expo config</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">e</div>
+              <div class="step-content"><strong>npm test -- --coverage</strong> — 25 tests + coverage report</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">f</div>
+              <div class="step-content"><strong>Upload coverage artifact</strong> — retenido 7 días</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="background: #16a34a; border-radius: 8px; padding: 8px 12px; font-weight: 800; font-size: 18px;">2</div>
+            <h3 style="color: white; font-size: 20px;">Job: build</h3>
+          </div>
+          <div class="step-list">
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">a</div>
+              <div class="step-content"><strong>needs: quality</strong> — solo corre si quality pasa</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">b</div>
+              <div class="step-content">Checkout + Setup Node 20</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">c</div>
+              <div class="step-content">npm ci --legacy-peer-deps</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="background: var(--gray-700); font-size: 12px;">d</div>
+              <div class="step-content"><strong>npx expo export --platform web</strong> — valida que el bundle compila sin errores</div>
+            </div>
+          </div>
+          <div class="separator"></div>
+          <p style="font-size: 14px; color: rgba(255,255,255,0.7);">Triggers: push y PR a <code>main</code> y <code>develop</code></p>
+        </div>
+        <div class="card" style="margin-top: 16px; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.07);">
+          <h3 style="color: var(--green-400);">Qué garantiza el pipeline</h3>
+          <ul class="check-list" style="font-size: 14px; margin-top: 10px;">
+            <li>Ningún merge con errores de TypeScript</li>
+            <li>Ningún merge con tests fallidos</li>
+            <li>Ningún merge con el bundle roto</li>
+            <li>Coverage visible como artifact descargable</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 11 -->
+  <section class="slide" id="slide-11">
+    <div class="slide-number">11 / 14</div>
+    <h2>Uso de IA — Claude via OpenCode</h2>
+    <div class="card-grid cols-2" style="gap: 20px;">
+      <div>
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>Herramientas</h3>
+          <ul class="bullet-list" style="margin-top: 10px; font-size: 15px;">
+            <li><strong>OpenCode</strong> — motor de orquestación de sub-agentes especializados por fase (explore, spec, design, apply, verify)</li>
+            <li><strong>Claude Sonnet 4.6</strong> (anthropic/claude-sonnet-4-6) — modelo base para todos los sub-agentes y el orquestador</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Tareas delegadas a IA</h3>
+          <ul class="check-list" style="margin-top: 10px; font-size: 14px;">
+            <li>15+ tipos TypeScript del dominio</li>
+            <li>9 handlers MSW v2 tipados en &lt;5 min</li>
+            <li>Implementación PKCE RFC 7636</li>
+            <li>Logger con sanitización regex</li>
+            <li>Arquitectura offline-first con cache TTL</li>
+            <li>25 tests con casos edge no triviales</li>
+            <li>GitHub Actions YAML</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom: 16px; border-color: rgba(250,204,21,0.3); background: rgba(250,204,21,0.07);">
+          <h3 style="color: var(--yellow-400);">Tareas NO delegadas</h3>
+          <ul class="bullet-list" style="margin-top: 10px; font-size: 14px;">
+            <li>Auditoría del PKCE contra RFC 7636 (verificación manual)</li>
+            <li>ai-usage.md (redactado por el arquitecto — requiere reflexión honesta)</li>
+            <li>Decisiones de arquitectura de capas</li>
+            <li>Validación de que cada test es significativo (no trivial)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Protocolo de validación</h3>
+          <div class="step-list" style="margin-top: 10px; font-size: 14px;">
+            <div class="step">
+              <div class="step-num" style="font-size: 12px; background: var(--gray-700);">1</div>
+              <div class="step-content">Sub-agente produce output</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="font-size: 12px; background: var(--gray-700);">2</div>
+              <div class="step-content"><code>npx tsc --noEmit</code> → 0 errores</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="font-size: 12px; background: var(--gray-700);">3</div>
+              <div class="step-content"><code>npx jest</code> → 25/25 passing</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="font-size: 12px; background: var(--gray-700);">4</div>
+              <div class="step-content">Code review manual de lógica de seguridad</div>
+            </div>
+            <div class="step">
+              <div class="step-num" style="font-size: 12px; background: var(--gray-700);">5</div>
+              <div class="step-content">Aprobado → siguiente fase</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 12 -->
+  <section class="slide" id="slide-12">
+    <div class="slide-number">12 / 14</div>
+    <h2>Seguridad — OWASP Mobile Top 10</h2>
+    <table style="margin-bottom: 20px;">
+      <tr>
+        <th>Riesgo OWASP</th>
+        <th>Estado</th>
+        <th>Implementación</th>
+      </tr>
+      <tr class="owasp-row-ok">
+        <td>M1: Improper Credential Usage</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+        <td>PKCE RFC 7636; tokens solo en SecureStore (OS Keychain); contraseña nunca almacenada</td>
+      </tr>
+      <tr class="owasp-row-ok">
+        <td>M2: Supply Chain Security</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+        <td>npm ci con lock file en CI; dependencias mínimas del ecosistema Expo</td>
+      </tr>
+      <tr class="owasp-row-ok">
+        <td>M4: Input/Output Validation</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+        <td>Validación en transferStore antes de POST; validación server-side en MSW (422)</td>
+      </tr>
+      <tr class="owasp-row-ok">
+        <td>M8: Security Misconfiguration</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+        <td>logger.ts sanitiza Bearer, access_token, refresh_token, password antes de logear</td>
+      </tr>
+      <tr class="owasp-row-ok">
+        <td>M9: Insecure Data Storage</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+        <td>SecureStore para tokens; AsyncStorage solo para cache de negocio no sensible</td>
+      </tr>
+    </table>
+    <div class="card-grid cols-2" style="gap: 16px;">
+      <div class="card">
+        <h3>Logger — Sanitización real</h3>
+        <div class="code-block" style="font-size: 12px; margin-top: 10px;">const SENSITIVE_PATTERNS = [
+  /Bearer\s+[\w.-]+/gi,
+  /access_token["\s:=]+[\w.-]+/gi,
+  /refresh_token["\s:=]+[\w.-]+/gi,
+  /password["\s:=]+"[^"]+"/gi,
+];
+// Cualquier match → reemplazado por [REDACTED]</div>
+      </div>
+      <div class="card">
+        <h3>TokenStore — Jamás loguea valores</h3>
+        <div class="code-block" style="font-size: 12px; margin-top: 10px;">setTokens(access: string, refresh: string) {
+  _accessToken = access;
+  _refreshToken = refresh;
+  // Never log actual values
+  console.debug('[tokenStore] tokens set: '
+    + 'access=[REDACTED], refresh=[REDACTED]');
+}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 13 -->
+  <section class="slide" id="slide-13">
+    <div class="slide-number">13 / 14</div>
+    <h2>Cómo Escalar a Equipo Real</h2>
+    <div class="card-grid cols-2" style="gap: 20px;">
+      <div>
+        <h3 style="margin-bottom: 14px;">Backend real (reemplazar mock)</h3>
+        <div class="scale-box">Reemplazar <code>devClient.ts</code> + <code>handlers.ts</code> con un cliente HTTP real contra el API de Inteligo. Los stores Zustand no cambian — solo la implementación de apiClient.</div>
+        <div class="scale-box">Agregar refresh token flow en apiClient: interceptar 401, llamar <code>/auth/refresh</code> con el refresh token, reintentar el request original.</div>
+        <div class="scale-box">Certificado SSL pinning con EAS Build + TrustKit (iOS) / OkHttp CertificatePinner (Android).</div>
+
+        <h3 style="margin-bottom: 14px; margin-top: 20px;">Testing escalado</h3>
+        <div class="scale-box">Tests de integración contra el API real en staging (mismo MSW handlers como contrato).</div>
+        <div class="scale-box">Tests E2E con Detox o Maestro para flujos críticos (login → dashboard → transferencia).</div>
+        <div class="scale-box">Visual regression testing con Storybook + Chromatic para componentes UI.</div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 14px;">Performance</h3>
+        <div class="scale-box">Reemplazar <code>FlatList</code> con <code>FlashList</code> (Shopify) para listas de transacciones grandes — mejor reciclado de celdas.</div>
+        <div class="scale-box">Infinite scroll mejorado con prefetching: cargar la siguiente página antes de que el usuario llegue al final.</div>
+        <div class="scale-box">React.memo + useMemo en componentes de lista para evitar re-renders innecesarios.</div>
+
+        <h3 style="margin-bottom: 14px; margin-top: 20px;">Seguridad producción</h3>
+        <div class="scale-box">Encriptar AsyncStorage con <code>react-native-mmkv</code> + AES para datos de saldo.</div>
+        <div class="scale-box">Biometric auth (TouchID/FaceID) via <code>expo-local-authentication</code> para operaciones críticas.</div>
+        <div class="scale-box"><code>npm audit</code> y Dependabot en el pipeline para vulnerabilidades de supply chain.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SLIDE 14 -->
+  <section class="slide" id="slide-14">
+    <div class="slide-number">14 / 14</div>
+    <h2>Demo Live — Cómo Correr la App</h2>
+    <div class="card-grid cols-2" style="gap: 24px;">
+      <div>
+        <h3 style="margin-bottom: 14px;">Requisitos previos</h3>
+        <ul class="check-list" style="font-size: 15px; margin-bottom: 20px;">
+          <li>Node.js 20+</li>
+          <li>Android Studio con emulador Pixel 7 API 34</li>
+          <li>Yarn 4+ o npm</li>
+        </ul>
+        <h3 style="margin-bottom: 12px;">Comandos para levantar</h3>
+        <div class="code-block" style="font-size: 13px;">
+# 1. Instalar dependencias
+cd bankgo
+npm install --legacy-peer-deps
+
+# 2. Levantar emulador Android
+# (desde Android Studio o terminal)
+emulator -avd Pixel_7_API_34
+
+# 3. Asegurar que el puerto está disponible
+adb reverse tcp:8081 tcp:8081
+
+# 4. Arrancar Metro con flags de device
+EXPO_OFFLINE=1 npx expo start \
+  --host localhost --android
+
+# 5. Si la app no abre automáticamente
+# En el emulador abrir Expo Go y escanear QR
+# o presionar 'a' en la terminal de Metro</div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 14px;">Credenciales de demo</h3>
+        <div class="card" style="margin-bottom: 16px;">
+          <table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Email</td><td>maria.garcia@example.com</td></tr>
+            <tr><td>Contraseña</td><td>cualquier valor (mín. 4 chars)</td></tr>
+          </table>
+        </div>
+        <h3 style="margin-bottom: 12px;">Correr tests</h3>
+        <div class="code-block" style="font-size: 13px;">
+# Todos los tests con coverage
+npm test -- --coverage
+
+# En modo watch (TDD)
+npm run test:watch
+
+# Type check
+npx tsc --noEmit
+
+# Lint
+npm run lint</div>
+        <div class="card" style="margin-top: 16px; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.07);">
+          <p style="font-size: 14px; text-align: center;"><span style="color: var(--green-400); font-weight: 700;">25/25 tests passing</span> · <span style="color: var(--blue-400);">0 TypeScript errors</span> · <span style="color: var(--yellow-400);">0 ESLint warnings</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Navigation bar -->
+<nav class="nav-bar">
+  <button id="btn-prev" onclick="navigate(-1)" disabled>← Anterior</button>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+    <span class="slide-counter" id="counter">Slide 1 de 14</span>
+    <div class="dots" id="dots-container"></div>
+  </div>
+  <button id="btn-next" onclick="navigate(1)">Siguiente →</button>
+</nav>
+
+<script>
+  const TOTAL = 14;
+  let current = 1;
+
+  // Build dots
+  const dotsContainer = document.getElementById('dots-container');
+  for (let i = 1; i <= TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 1 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsContainer.appendChild(d);
+  }
+
+  function goTo(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    dotsContainer.children[current - 1].classList.remove('active');
+    current = Math.max(1, Math.min(TOTAL, n));
+    document.getElementById('slide-' + current).classList.add('active');
+    dotsContainer.children[current - 1].classList.add('active');
+    document.getElementById('counter').textContent = 'Slide ' + current + ' de ' + TOTAL;
+    document.getElementById('btn-prev').disabled = current === 1;
+    document.getElementById('btn-next').disabled = current === TOTAL;
+  }
+
+  function navigate(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+  });
+</script>
+</body>
+</html>
