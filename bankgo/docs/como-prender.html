@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BankGo — Cómo prender el proyecto</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --bg2: #1e293b;
+      --bg3: #263147;
+      --blue-500: #3b82f6;
+      --blue-400: #60a5fa;
+      --blue-300: #93c5fd;
+      --green-400: #4ade80;
+      --green-500: #22c55e;
+      --yellow-400: #facc15;
+      --red-400: #f87171;
+      --purple-400: #c084fc;
+      --orange-400: #fb923c;
+      --white: #f8fafc;
+      --gray-400: #94a3b8;
+      --gray-300: #cbd5e1;
+      --gray-200: #e2e8f0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* Sidebar */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #0a1220;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      padding: 32px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 0 24px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo h1 {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sidebar-logo p {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 4px;
+    }
+
+    .nav-section {
+      padding: 8px 12px;
+    }
+    .nav-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gray-400);
+      padding: 6px 12px;
+    }
+    .nav-link {
+      display: block;
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--gray-300);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: rgba(59,130,246,0.15);
+      color: var(--blue-400);
+    }
+    .nav-link::before {
+      margin-right: 8px;
+    }
+
+    /* Main content */
+    main {
+      padding: 48px 64px;
+      max-width: 900px;
+    }
+
+    h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 8px;
+      margin-top: 48px;
+    }
+    h2:first-child { margin-top: 0; }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--blue-400);
+      margin-bottom: 12px;
+      margin-top: 28px;
+    }
+
+    p {
+      color: var(--gray-300);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: var(--gray-400);
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    /* Step cards */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .step-card {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      background: var(--blue-500);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .step-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .step-subtitle {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    .step-body {
+      padding: 20px;
+    }
+
+    /* Code blocks */
+    .code-wrap {
+      position: relative;
+      margin: 12px 0;
+    }
+
+    .code-label {
+      background: var(--bg3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--gray-400);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .code-block {
+      background: #0d1b2e;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0 0 8px 8px;
+      padding: 16px 20px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .code-block-standalone {
+      background: #0d1b2e;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 12px 0;
+    }
+
+    /* Syntax highlighting */
+    .kw { color: #c084fc; }   /* keyword */
+    .str { color: #4ade80; }  /* string */
+    .cmd { color: #60a5fa; }  /* command */
+    .cmt { color: #64748b; }  /* comment */
+    .var { color: #fb923c; }  /* variable/env */
+    .num { color: #fbbf24; }  /* number */
+    .flag { color: #f9a8d4; } /* flag */
+    .ok { color: #4ade80; }   /* success */
+    .err { color: #f87171; }  /* error */
+    .warn { color: #facc15; } /* warning */
+
+    /* Info boxes */
+    .box {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 14px;
+      border-left: 3px solid;
+    }
+    .box-info {
+      background: rgba(59,130,246,0.1);
+      border-color: var(--blue-500);
+      color: var(--blue-300);
+    }
+    .box-warn {
+      background: rgba(250,204,21,0.1);
+      border-color: var(--yellow-400);
+      color: #fde68a;
+    }
+    .box-error {
+      background: rgba(248,113,113,0.1);
+      border-color: var(--red-400);
+      color: #fca5a5;
+    }
+    .box-success {
+      background: rgba(74,222,128,0.1);
+      border-color: var(--green-400);
+      color: #86efac;
+    }
+
+    .box-icon {
+      font-size: 16px;
+      margin-right: 8px;
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--gray-300);
+    }
+    .checklist li::before {
+      content: '✓';
+      color: var(--green-400);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* Requirement grid */
+    .req-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .req-card {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .req-icon { font-size: 24px; margin-bottom: 8px; }
+    .req-name { font-size: 14px; font-weight: 700; color: var(--white); }
+    .req-version { font-size: 12px; color: var(--blue-400); margin-top: 4px; }
+    .req-note { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+
+    /* Credentials */
+    .creds-table {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 100%;
+    }
+    .creds-table th {
+      background: rgba(59,130,246,0.2);
+      color: var(--blue-300);
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .creds-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+      color: var(--gray-300);
+    }
+    .creds-table tr:last-child td { border-bottom: none; }
+    .creds-table td code {
+      background: rgba(59,130,246,0.15);
+      color: var(--blue-300);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    /* Troubleshoot */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid rgba(248,113,113,0.2);
+      border-left: 3px solid var(--red-400);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .trouble-problem {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--red-400);
+      margin-bottom: 8px;
+    }
+    .trouble-cause {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-bottom: 10px;
+    }
+    .trouble-solution {
+      font-size: 13px;
+      color: var(--green-400);
+    }
+
+    /* Divider */
+    .section-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+      margin: 40px 0;
+    }
+
+    /* Inline code */
+    code {
+      background: rgba(59,130,246,0.12);
+      color: var(--blue-300);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+
+    strong { color: var(--white); }
+
+    /* Anchor targets */
+    section { scroll-margin-top: 24px; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>BankGo</h1>
+      <p>Guía de instalación y arranque</p>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Inicio rápido</div>
+      <a href="#requisitos" class="nav-link active">📋 Requisitos previos</a>
+      <a href="#instalacion" class="nav-link">📦 Instalación</a>
+      <a href="#emulador" class="nav-link">📱 Emulador Android</a>
+      <a href="#metro" class="nav-link">⚡ Arrancar Metro</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Operación</div>
+      <a href="#app-emulador" class="nav-link">🚀 Abrir la app</a>
+      <a href="#credenciales" class="nav-link">🔑 Credenciales de prueba</a>
+      <a href="#tests" class="nav-link">🧪 Correr tests</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Problemas frecuentes</div>
+      <a href="#trouble-8081" class="nav-link">⚠ Metro ya en 8081</a>
+      <a href="#trouble-platform" class="nav-link">⚠ PlatformConstants</a>
+      <a href="#trouble-getdevserver" class="nav-link">⚠ getDevServer</a>
+      <a href="#trouble-adb" class="nav-link">⚠ adb reverse</a>
+    </div>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <main>
+
+    <!-- TÍTULO -->
+    <div style="margin-bottom: 40px;">
+      <div style="font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue-400); margin-bottom: 8px;">GUÍA DE ARRANQUE</div>
+      <h1 style="font-size: 40px; font-weight: 900; line-height: 1.1; margin-bottom: 12px;">Cómo prender BankGo</h1>
+      <p class="section-desc">Guía paso a paso para levantar el proyecto desde cero en un emulador Android. Todos los comandos son exactos y copiables.</p>
+    </div>
+
+    <!-- ===================== REQUISITOS ===================== -->
+    <section id="requisitos">
+      <h2>📋 Requisitos previos</h2>
+      <p>Antes de empezar, verificá que tenés instaladas estas herramientas:</p>
+
+      <div class="req-grid">
+        <div class="req-card">
+          <div class="req-icon">🟢</div>
+          <div class="req-name">Node.js</div>
+          <div class="req-version">v20 LTS (recomendado)</div>
+          <div class="req-note">v18 mínimo, v21+ puede tener incompatibilidades</div>
+        </div>
+        <div class="req-card">
+          <div class="req-icon">🤖</div>
+          <div class="req-name">Android Studio</div>
+          <div class="req-version">Hedgehog o posterior</div>
+          <div class="req-note">Con SDK Android 34 (API Level 34)</div>
+        </div>
+        <div class="req-card">
+          <div class="req-icon">📱</div>
+          <div class="req-name">Emulador</div>
+          <div class="req-version">Pixel 7 — API 34</div>
+          <div class="req-note">Configurado en AVD Manager</div>
+        </div>
+        <div class="req-card">
+          <div class="req-icon">🔧</div>
+          <div class="req-name">ADB</div>
+          <div class="req-version">Incluido en Android Studio</div>
+          <div class="req-note">Agregar al PATH del sistema</div>
+        </div>
+        <div class="req-card">
+          <div class="req-icon">📦</div>
+          <div class="req-name">npm / yarn</div>
+          <div class="req-version">npm 10+ o yarn 4+</div>
+          <div class="req-note">El proyecto usa yarn 4.10.2 internamente</div>
+        </div>
+        <div class="req-card">
+          <div class="req-icon">🌿</div>
+          <div class="req-name">Git</div>
+          <div class="req-version">2.x</div>
+          <div class="req-note">Para clonar el repositorio</div>
+        </div>
+      </div>
+
+      <div class="box box-info">
+        <span class="box-icon">ℹ</span>
+        <strong>Verificar instalación:</strong>
+        <div class="code-block-standalone" style="margin-top: 8px; border-radius: 6px; font-size: 13px;"><span class="cmd">node</span> <span class="flag">--version</span>   <span class="cmt"># debe mostrar v20.x.x</span>
+<span class="cmd">adb</span> <span class="flag">--version</span>    <span class="cmt"># debe mostrar Android Debug Bridge</span>
+<span class="cmd">npm</span> <span class="flag">--version</span>    <span class="cmt"># debe mostrar 10.x.x</span></div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===================== INSTALACIÓN ===================== -->
+    <section id="instalacion">
+      <h2>📦 Instalación de dependencias</h2>
+      <p>Cloná el repositorio e instalá las dependencias. El flag <code>--legacy-peer-deps</code> es necesario porque React Native 0.81 y Expo SDK 54 tienen dependencias de peers que chocaron con npm 10.</p>
+
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <div>
+              <div class="step-title">Clonar el repositorio</div>
+              <div class="step-subtitle">O navegá a la carpeta si ya tenés el código</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal</div>
+              <div class="code-block"><span class="cmd">git</span> clone https://github.com/TU_ORG/ai-software-engineer.git
+<span class="cmd">cd</span> ai-software-engineer/bankgo</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">2</div>
+            <div>
+              <div class="step-title">Instalar dependencias</div>
+              <div class="step-subtitle">~2-3 minutos la primera vez</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal — dentro de bankgo/</div>
+              <div class="code-block"><span class="cmd">npm</span> install <span class="flag">--legacy-peer-deps</span>
+<span class="cmt"># Alternativamente con yarn:</span>
+<span class="cmd">yarn</span> install</div>
+            </div>
+            <div class="box box-warn" style="margin-top: 12px;">
+              <span class="box-icon">⚠</span>
+              <strong>NUNCA usar <code>npm install</code> sin <code>--legacy-peer-deps</code></strong> — el postinstall script (<code>scripts/patch-expo-router.js</code>) también se ejecuta automáticamente.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">3</div>
+            <div>
+              <div class="step-title">Verificar instalación</div>
+              <div class="step-subtitle">Asegurarse de que no hay errores críticos</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Verificar type check</div>
+              <div class="code-block"><span class="cmd">npx</span> tsc <span class="flag">--noEmit</span>
+<span class="cmt"># Resultado esperado: (sin salida = 0 errores)</span></div>
+            </div>
+            <div class="box box-success" style="margin-top: 8px;">
+              <span class="box-icon">✓</span>
+              <code>npx tsc --noEmit</code> sin errores significa que TypeScript compila correctamente.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===================== EMULADOR ===================== -->
+    <section id="emulador">
+      <h2>📱 Levantar el emulador Android</h2>
+      <p>Necesitás un emulador corriendo <em>antes</em> de arrancar Metro para que Expo pueda instalar la app automáticamente.</p>
+
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <div>
+              <div class="step-title">Opción A: desde Android Studio</div>
+              <div class="step-subtitle">Más simple para empezar</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="checklist">
+              <li>Abrir Android Studio</li>
+              <li>Ir a <strong>Device Manager</strong> (icono de teléfono en la barra lateral)</li>
+              <li>Buscar el emulador <strong>Pixel 7 API 34</strong></li>
+              <li>Hacer click en el botón ▶ (Play) para iniciarlo</li>
+              <li>Esperar a que el emulador cargue completamente (se ve la pantalla de inicio de Android)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">2</div>
+            <div>
+              <div class="step-title">Opción B: desde la terminal</div>
+              <div class="step-subtitle">Para automatizar o scripting</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal</div>
+              <div class="code-block"><span class="cmt"># Listar emuladores disponibles</span>
+<span class="cmd">emulator</span> <span class="flag">-list-avds</span>
+<span class="cmt"># Output esperado: Pixel_7_API_34</span>
+
+<span class="cmt"># Arrancar el emulador específico</span>
+<span class="cmd">emulator</span> <span class="flag">-avd</span> Pixel_7_API_34
+
+<span class="cmt"># Si el comando 'emulator' no existe, buscar en:</span>
+<span class="cmt"># ~/Android/Sdk/emulator/emulator (Linux/Mac)</span>
+<span class="cmt"># %LOCALAPPDATA%\Android\Sdk\emulator\emulator.exe (Windows)</span></div>
+            </div>
+            <div class="box box-info" style="margin-top: 8px;">
+              <span class="box-icon">ℹ</span>
+              El emulador tarda entre 30 y 90 segundos en cargar. Esperá a que aparezca la pantalla de inicio de Android antes de continuar.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">3</div>
+            <div>
+              <div class="step-title">Configurar port forwarding</div>
+              <div class="step-subtitle">Necesario para que el emulador alcance Metro en tu máquina</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal — con el emulador ya corriendo</div>
+              <div class="code-block"><span class="cmd">adb</span> reverse tcp:8081 tcp:8081
+<span class="cmt"># Output esperado: 8081</span>
+<span class="cmt"># Si no hay output o da error, ver sección Troubleshooting</span></div>
+            </div>
+            <div class="box box-warn">
+              <span class="box-icon">⚠</span>
+              <strong>Este paso es crítico.</strong> Sin <code>adb reverse</code>, el emulador no puede conectarse al servidor Metro que corre en tu máquina. Síntoma: la app abre pero queda en pantalla de carga o muestra "Unable to connect to Metro".
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===================== METRO ===================== -->
+    <section id="metro">
+      <h2>⚡ Arrancar Metro</h2>
+      <p>Metro es el bundler de JavaScript de React Native. Expo lo envuelve con su propio CLI. El comando exacto importa — hay flags específicos que resuelven problemas conocidos en este proyecto.</p>
+
+      <div class="step-card" style="margin-bottom: 20px;">
+        <div class="step-header">
+          <div class="step-number">★</div>
+          <div>
+            <div class="step-title">Comando canónico para este proyecto</div>
+            <div class="step-subtitle">Usá este exacto — cada flag tiene un motivo</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="code-wrap">
+            <div class="code-label">Terminal — dentro de bankgo/</div>
+            <div class="code-block"><span class="var">EXPO_OFFLINE</span>=<span class="num">1</span> <span class="cmd">npx</span> expo start <span class="flag">--host</span> localhost <span class="flag">--android</span></div>
+          </div>
+          <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="background: var(--bg3); border-radius: 8px; padding: 14px;">
+              <div style="font-size: 13px; font-weight: 700; color: var(--orange-400); margin-bottom: 6px;"><code>EXPO_OFFLINE=1</code></div>
+              <p style="font-size: 13px; color: var(--gray-400); margin: 0;">Evita que Expo intente conectarse a los servidores de Expo (updates, telemetría). Elimina timeouts de red cuando no hay conexión o cuando hay firewalls.</p>
+            </div>
+            <div style="background: var(--bg3); border-radius: 8px; padding: 14px;">
+              <div style="font-size: 13px; font-weight: 700; color: var(--orange-400); margin-bottom: 6px;"><code>--host localhost</code></div>
+              <p style="font-size: 13px; color: var(--gray-400); margin: 0;">Fuerza a Metro a usar localhost en vez de la IP de la interfaz de red. Necesario para que <code>adb reverse</code> funcione correctamente en emuladores Android.</p>
+            </div>
+            <div style="background: var(--bg3); border-radius: 8px; padding: 14px;">
+              <div style="font-size: 13px; font-weight: 700; color: var(--orange-400); margin-bottom: 6px;"><code>--android</code></div>
+              <p style="font-size: 13px; color: var(--gray-400); margin: 0;">Abre directamente el emulador Android detectado. Equivale a presionar 'a' en el menú de Metro después de iniciar.</p>
+            </div>
+            <div style="background: var(--bg3); border-radius: 8px; padding: 14px; border: 1px solid rgba(74,222,128,0.2);">
+              <div style="font-size: 13px; font-weight: 700; color: var(--green-400); margin-bottom: 6px;">Resultado esperado</div>
+              <p style="font-size: 13px; color: var(--gray-400); margin: 0;">Metro inicia, muestra el QR code, y empieza a instalar la app en el emulador automáticamente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>¿Qué ves en la terminal de Metro?</h3>
+      <div class="code-block-standalone" style="font-size: 13px;"><span class="ok">›</span> Metro waiting on exp://127.0.0.1:8081
+<span class="ok">›</span> Scan the QR code above with Expo Go (Android) or the Camera app (iOS)
+
+<span class="cmt">(automáticamente busca emulador con --android)</span>
+
+<span class="ok">›</span> Opening on Android...
+<span class="ok">›</span> Building JavaScript bundle...
+<span class="ok">█████████████████████████████</span> 100%
+<span class="ok">›</span> Bundle built in 2345ms</div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===================== APP EN EMULADOR ===================== -->
+    <section id="app-emulador">
+      <h2>🚀 Abrir la app en el emulador</h2>
+
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">A</div>
+            <div>
+              <div class="step-title">Si el flag --android funcionó</div>
+              <div class="step-subtitle">El caso normal</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="checklist">
+              <li>Metro detecta el emulador corriendo automáticamente</li>
+              <li>Instala la app Expo Go en el emulador si no está instalada</li>
+              <li>Abre la app BankGo directamente</li>
+              <li>La primera vez tarda ~30 segundos mientras se compila el bundle</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">B</div>
+            <div>
+              <div class="step-title">Si la app no abre automáticamente</div>
+              <div class="step-subtitle">Fallback manual</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div style="margin-bottom: 12px;">
+              <strong>Opción 1: presionar 'a' en Metro</strong>
+              <div class="code-wrap" style="margin-top: 8px;">
+                <div class="code-label">En la terminal donde corre Metro</div>
+                <div class="code-block"><span class="cmt"># Con Metro ya corriendo, presionar:</span>
+a<span class="cmt">  ← abre en Android</span></div>
+              </div>
+            </div>
+            <div>
+              <strong>Opción 2: abrir manualmente desde el emulador</strong>
+              <ul class="checklist" style="margin-top: 8px;">
+                <li>En el emulador, abrir la app <strong>Expo Go</strong></li>
+                <li>Seleccionar "Enter URL manually"</li>
+                <li>Ingresar: <code>exp://127.0.0.1:8081</code></li>
+              </ul>
+            </div>
+            <div style="margin-top: 16px;">
+              <strong>Opción 3: via adb</strong>
+              <div class="code-wrap" style="margin-top: 8px;">
+                <div class="code-label">Terminal</div>
+                <div class="code-block"><span class="cmd">adb</span> shell am start -a android.intent.action.VIEW \
+  -d "exp://127.0.0.1:8081" \
+  host.exp.exponent</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===================== CREDENCIALES ===================== -->
+    <section id="credenciales">
+      <h2>🔑 Credenciales de prueba</h2>
+      <p>El backend es un mock completo — no hay un servidor real. Las credenciales son hardcodeadas en <code>src/services/api/devClient.ts</code>.</p>
+
+      <table class="creds-table" style="margin: 20px 0;">
+        <tr>
+          <th>Pantalla</th>
+          <th>Campo</th>
+          <th>Valor</th>
+          <th>Notas</th>
+        </tr>
+        <tr>
+          <td>Login</td>
+          <td>Email</td>
+          <td><code>maria.garcia@example.com</code></td>
+          <td>Usuario de seed (María García — Inteligo SAB)</td>
+        </tr>
+        <tr>
+          <td>Login</td>
+          <td>Contraseña</td>
+          <td><code>cualquier valor</code></td>
+          <td>Mínimo 4 caracteres. El mock acepta cualquier password.</td>
+        </tr>
+        <tr>
+          <td>Dashboard</td>
+          <td>—</td>
+          <td>3 cuentas visibles</td>
+          <td>Corriente (S/ 15,480), Ahorros (S/ 45,220), Inversiones (S/ 120,750)</td>
+        </tr>
+        <tr>
+          <td>Transferencias</td>
+          <td>Beneficiarios</td>
+          <td>3 disponibles</td>
+          <td>Carlos Quispe (BCP), Lucía Fernández (Interbank), Diego Salazar (BBVA)</td>
+        </tr>
+        <tr>
+          <td>Tarjetas</td>
+          <td>—</td>
+          <td>2 tarjetas</td>
+          <td>Visa •4821 (activa), Mastercard •3374 (activa)</td>
+        </tr>
+      </table>
+
+      <div class="box box-info">
+        <span class="box-icon">ℹ</span>
+        <strong>Datos ficticios:</strong> Todos los nombres, IBANs y correos del seed son inventados. No hay PII real en ningún archivo del proyecto.
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===================== TESTS ===================== -->
+    <section id="tests">
+      <h2>🧪 Correr los tests</h2>
+      <p>25 tests en 5 suites. Se ejecutan con jest + jest-expo sin necesidad del emulador — solo Node.js.</p>
+
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <div>
+              <div class="step-title">Todos los tests con coverage</div>
+              <div class="step-subtitle">Comando principal</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal — dentro de bankgo/</div>
+              <div class="code-block"><span class="cmd">npm</span> test <span class="flag">-- --coverage</span>
+
+<span class="cmt"># Output esperado:</span>
+<span class="ok"> PASS</span>  __tests__/services/pkce.test.ts
+<span class="ok"> PASS</span>  __tests__/services/logger.test.ts
+<span class="ok"> PASS</span>  __tests__/services/cache.test.ts
+<span class="ok"> PASS</span>  __tests__/stores/accountsStore.test.ts
+<span class="ok"> PASS</span>  __tests__/stores/transferStore.test.ts
+
+<span class="ok">Test Suites: 5 passed, 5 total</span>
+<span class="ok">Tests:       25 passed, 25 total</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">2</div>
+            <div>
+              <div class="step-title">Tests en modo watch (TDD)</div>
+              <div class="step-subtitle">Re-ejecuta al guardar archivos</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal</div>
+              <div class="code-block"><span class="cmd">npm</span> run test:watch
+
+<span class="cmt"># Opciones interactivas en modo watch:</span>
+<span class="cmt"># a → correr todos los tests</span>
+<span class="cmt"># f → solo los tests fallidos</span>
+<span class="cmt"># p → filtrar por nombre de archivo</span>
+<span class="cmt"># t → filtrar por nombre de test</span>
+<span class="cmt"># q → salir</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">3</div>
+            <div>
+              <div class="step-title">Suite específica</div>
+              <div class="step-subtitle">Para debuggear un grupo</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal</div>
+              <div class="code-block"><span class="cmt"># Solo tests de PKCE</span>
+<span class="cmd">npx</span> jest pkce.test.ts
+
+<span class="cmt"># Solo tests del accountsStore</span>
+<span class="cmd">npx</span> jest accountsStore
+
+<span class="cmt"># Con verbose (muestra cada test individual)</span>
+<span class="cmd">npx</span> jest <span class="flag">--verbose</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">4</div>
+            <div>
+              <div class="step-title">Calidad de código</div>
+              <div class="step-subtitle">Type check + lint</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-wrap">
+              <div class="code-label">Terminal</div>
+              <div class="code-block"><span class="cmt"># TypeScript sin compilar (solo verificar tipos)</span>
+<span class="cmd">npx</span> tsc <span class="flag">--noEmit</span>
+
+<span class="cmt"># ESLint</span>
+<span class="cmd">npm</span> run lint
+
+<span class="cmt"># ESLint + autofix</span>
+<span class="cmd">npm</span> run lint:fix
+
+<span class="cmt"># Prettier</span>
+<span class="cmd">npm</span> run format</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===================== TROUBLESHOOTING ===================== -->
+    <h2 id="troubleshooting">⚠ Troubleshooting</h2>
+    <p>Problemas frecuentes que aparecieron durante el desarrollo y sus soluciones exactas.</p>
+
+    <!-- METRO 8081 -->
+    <section id="trouble-8081">
+      <h3>Metro ya está corriendo en el puerto 8081</h3>
+      <div class="trouble-item">
+        <div class="trouble-problem">Error: listen EADDRINUSE: address already in use :::8081</div>
+        <div class="trouble-cause">Causa: Hay una instancia de Metro (u otro proceso) que ya ocupó el puerto 8081. Esto pasa si cerraste Metro con Ctrl+C pero el proceso no terminó limpiamente.</div>
+        <div class="trouble-solution">
+          Solución:
+          <div class="code-block-standalone" style="font-size: 13px; margin-top: 8px;"><span class="cmt"># Encontrar el proceso que usa el puerto</span>
+<span class="cmd">lsof</span> <span class="flag">-i</span> :8081
+<span class="cmt"># Output: node   12345  username  25u  IPv6  ...</span>
+
+<span class="cmt"># Matarlo con su PID</span>
+<span class="cmd">kill</span> <span class="flag">-9</span> 12345
+
+<span class="cmt"># En Windows:</span>
+<span class="cmd">netstat</span> <span class="flag">-ano</span> | findstr :8081
+<span class="cmd">taskkill</span> <span class="flag">/PID</span> 12345 <span class="flag">/F</span>
+
+<span class="cmt"># Alternativa: usar un puerto diferente</span>
+<span class="var">EXPO_OFFLINE</span>=1 npx expo start <span class="flag">--port</span> 8082 <span class="flag">--host</span> localhost
+<span class="cmt"># Y actualizar adb reverse:</span>
+<span class="cmd">adb</span> reverse tcp:8082 tcp:8082</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLATFORM CONSTANTS -->
+    <section id="trouble-platform">
+      <h3>Error: PlatformConstants no disponible</h3>
+      <div class="trouble-item">
+        <div class="trouble-problem">Invariant Violation: Module AppRegistry is not a registered callable module</div>
+        <div class="trouble-cause">Causa: Las versiones de React Native 0.81 y Expo SDK 54 habilitaron la New Architecture por defecto. Algunos módulos nativos en el emulador no estaban preparados para JSI (JavaScript Interface), causando fallos al registrar módulos.</div>
+        <div class="trouble-solution">
+          Solución: El archivo <code>app.json</code> ya tiene <code>"newArchEnabled": true</code> que en combinación con <code>"edgeToEdgeEnabled": false</code> y <code>"predictiveBackGestureEnabled": false</code> estabiliza el comportamiento. Si el error persiste:
+          <div class="code-block-standalone" style="font-size: 13px; margin-top: 8px;"><span class="cmt"># Limpiar la caché de Metro</span>
+<span class="cmd">npx</span> expo start <span class="flag">--clear</span>
+
+<span class="cmt"># O con el flag completo</span>
+<span class="var">EXPO_OFFLINE</span>=1 npx expo start <span class="flag">--clear --host</span> localhost <span class="flag">--android</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GETDEVSERVER -->
+    <section id="trouble-getdevserver">
+      <h3>Error: getDevServer is not a function</h3>
+      <div class="trouble-item">
+        <div class="trouble-problem">TypeError: (0, _reactNative.NativeModules).DevSettings.getDevServer is not a function</div>
+        <div class="trouble-cause">Causa: Expo Router 6.x tiene un conflicto con ciertas versiones de react-native en el entorno de desarrollo. El postinstall script en <code>scripts/patch-expo-router.js</code> parchea esto automáticamente.</div>
+        <div class="trouble-solution">
+          Solución: Verificar que el postinstall corrió correctamente:
+          <div class="code-block-standalone" style="font-size: 13px; margin-top: 8px;"><span class="cmt"># Re-ejecutar el postinstall manualmente</span>
+<span class="cmd">node</span> scripts/patch-expo-router.js
+
+<span class="cmt"># Si no existe el script, reinstalar desde cero</span>
+<span class="cmd">rm</span> <span class="flag">-rf</span> node_modules
+<span class="cmd">npm</span> install <span class="flag">--legacy-peer-deps</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADB REVERSE -->
+    <section id="trouble-adb">
+      <h3>adb reverse falla o la app no conecta</h3>
+      <div class="trouble-item">
+        <div class="trouble-problem">error: no devices/emulators found</div>
+        <div class="trouble-cause">Causa 1: El emulador no terminó de cargar cuando se ejecutó adb reverse. Causa 2: ADB no está en el PATH del sistema. Causa 3: El emulador está en un estado inconsistente.</div>
+        <div class="trouble-solution">
+          Soluciones:
+          <div class="code-block-standalone" style="font-size: 13px; margin-top: 8px;"><span class="cmt"># Verificar que el emulador está visible para adb</span>
+<span class="cmd">adb</span> devices
+<span class="cmt"># Output esperado:</span>
+<span class="cmt"># List of devices attached</span>
+<span class="cmt"># emulator-5554   device</span>
+
+<span class="cmt"># Si no aparece, reiniciar el servidor adb</span>
+<span class="cmd">adb</span> kill-server
+<span class="cmd">adb</span> start-server
+<span class="cmd">adb</span> devices  <span class="cmt"># verificar de nuevo</span>
+
+<span class="cmt"># Luego ejecutar reverse</span>
+<span class="cmd">adb</span> reverse tcp:8081 tcp:8081
+<span class="cmt"># Output esperado: 8081</span>
+
+<span class="cmt"># Si sigue fallando, probar con IP explícita</span>
+<span class="var">EXPO_OFFLINE</span>=1 npx expo start <span class="flag">--host</span> 0.0.0.0 <span class="flag">--android</span>
+<span class="cmt"># Expo intentará usar la IP local de tu máquina</span></div>
+        </div>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-problem">La app abre pero queda en "Fetching JavaScript bundle..."</div>
+        <div class="trouble-cause">Causa: El emulador no puede alcanzar Metro. Típicamente es que adb reverse no se ejecutó o se ejecutó antes de que el emulador estuviera listo.</div>
+        <div class="trouble-solution">
+          Solución: Con el emulador visible en pantalla y Metro corriendo:
+          <div class="code-block-standalone" style="font-size: 13px; margin-top: 8px;"><span class="cmd">adb</span> reverse tcp:8081 tcp:8081
+<span class="cmt"># Luego sacudir el emulador (Cmd+M o Ctrl+M) para abrir el menú Expo</span>
+<span class="cmt"># → "Reload"</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- FLUJO COMPLETO RESUMIDO -->
+    <section id="resumen">
+      <h2>⚡ Cheat sheet — Flujo completo en un solo bloque</h2>
+      <p>Para cuando ya sabés lo que hacés y solo querés los comandos rápido:</p>
+      <div class="code-wrap">
+        <div class="code-label">Terminal — flujo completo desde cero</div>
+        <div class="code-block"><span class="cmt"># ── SETUP (solo la primera vez) ──────────────────────</span>
+<span class="cmd">cd</span> ai-software-engineer/bankgo
+<span class="cmd">npm</span> install <span class="flag">--legacy-peer-deps</span>
+<span class="cmd">npx</span> tsc <span class="flag">--noEmit</span>   <span class="cmt"># verificar que compila</span>
+
+<span class="cmt"># ── CADA VEZ ─────────────────────────────────────────</span>
+<span class="cmt"># 1. Levantar emulador (en otra terminal o Android Studio)</span>
+<span class="cmd">emulator</span> <span class="flag">-avd</span> Pixel_7_API_34
+
+<span class="cmt"># 2. Esperar a que cargue, luego forward del puerto</span>
+<span class="cmd">adb</span> reverse tcp:8081 tcp:8081
+
+<span class="cmt"># 3. Arrancar Metro</span>
+<span class="var">EXPO_OFFLINE</span>=1 <span class="cmd">npx</span> expo start <span class="flag">--host</span> localhost <span class="flag">--android</span>
+
+<span class="cmt"># ── TESTS (en cualquier momento, sin emulador) ────────</span>
+<span class="cmd">npm</span> test <span class="flag">-- --coverage</span>   <span class="cmt"># 25/25 passing</span>
+<span class="cmd">npm</span> run lint              <span class="cmt"># 0 warnings</span>
+<span class="cmd">npx</span> tsc <span class="flag">--noEmit</span>          <span class="cmt"># 0 errors</span>
+
+<span class="cmt"># ── CREDENCIALES ─────────────────────────────────────</span>
+<span class="cmt"># Email:    maria.garcia@example.com</span>
+<span class="cmt"># Password: cualquier valor (mín. 4 chars)</span></div>
+      </div>
+
+      <div class="box box-success" style="margin-top: 20px;">
+        <span class="box-icon">✓</span>
+        <strong>¿Todo funcionando?</strong> Deberías ver el login de BankGo en el emulador. Ingresá las credenciales de prueba y explorá el dashboard, las transferencias y las tarjetas.
+      </div>
+    </section>
+
+    <div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.07); color: var(--gray-400); font-size: 13px; text-align: center;">
+      BankGo — Caso técnico Inteligo Group · Generado por GentleIA (anthropic/claude-sonnet-4-6) · 2026
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Highlight active section in sidebar based on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.getBoundingClientRect().top;
+      if (top <= 80) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  }
+
+  document.querySelector('main').addEventListener('scroll', updateActiveLink);
+</script>
+</body>
+</html>

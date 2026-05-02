@@ -3,6 +3,7 @@
     "name": "bankgo",
     "slug": "bankgo",
     "version": "1.0.0",
+    "scheme": "bankgo",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,7 +21,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false
     },
     "web": {

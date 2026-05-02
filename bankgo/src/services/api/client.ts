@@ -2,6 +2,7 @@
 
 import type { ApiError } from '@/types/index';
 import { tokenStore } from '../auth/tokenStore';
+import { devApiClient } from './devClient';
 
 // ---------------------------------------------------------------------------
 // Typed error
@@ -82,10 +83,10 @@ async function request<T>(
 }
 
 // ---------------------------------------------------------------------------
-// Public API client
+// HTTP-based client (usado en tests con MSW interceptando fetch)
 // ---------------------------------------------------------------------------
 
-export const apiClient = {
+export const httpApiClient = {
   get<T>(path: string): Promise<T> {
     return request<T>('GET', path);
   },
@@ -106,3 +107,13 @@ export const apiClient = {
     return request<T>('DELETE', path);
   },
 };
+
+// ---------------------------------------------------------------------------
+// Public apiClient — en __DEV__ (Expo Go) usa devClient sin fetch;
+// en tests usa el cliente HTTP real que MSW intercepta.
+// ---------------------------------------------------------------------------
+
+export const apiClient =
+  typeof __DEV__ !== 'undefined' && __DEV__ && process.env['NODE_ENV'] !== 'test'
+    ? devApiClient
+    : httpApiClient;
