@@ -1,5 +1,6 @@
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function AppLayout() {
@@ -34,6 +35,9 @@ export default function AppLayout() {
         options={{
           title: 'Inicio',
           tabBarLabel: 'Inicio',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -41,6 +45,9 @@ export default function AppLayout() {
         options={{
           title: 'Transferir',
           tabBarLabel: 'Transferir',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="swap-horizontal" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -48,6 +55,9 @@ export default function AppLayout() {
         options={{
           title: 'Tarjetas',
           tabBarLabel: 'Tarjetas',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="card" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
